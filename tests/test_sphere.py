@@ -46,5 +46,5 @@ REF_POINTS = np.array(
 
 def test_sphere():
     """Test SASA reference sphere code."""
-    test_points = 0.3*40*sphere(num=40)
+    test_points = 0.3 * 40 * sphere(num=40)
     assert_almost_equal(test_points, REF_POINTS, decimal=3)

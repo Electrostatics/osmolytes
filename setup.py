@@ -3,7 +3,7 @@ import setuptools
 
 
 with open("README.md", "r") as readme:
-    LONG_DESCRIPTION=readme.read()
+    LONG_DESCRIPTION = readme.read()
 
 
 setuptools.setup(
@@ -17,8 +17,6 @@ setuptools.setup(
     python_requires=">=3.6",
     license="BSD",
     packages=setuptools.find_packages(),
-    install_requires=[
-        "numpy"
-    ],
-    tests_require=["pytest"]
+    install_requires=["numpy"],
+    tests_require=["pytest"],
 )
