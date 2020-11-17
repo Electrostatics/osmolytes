@@ -17,6 +17,6 @@ setuptools.setup(
     python_requires=">=3.6",
     license="BSD",
     packages=setuptools.find_packages(),
-    install_requires=["numpy"],
+    install_requires=["numpy", "scipy"],
     tests_require=["pytest"],
 )
