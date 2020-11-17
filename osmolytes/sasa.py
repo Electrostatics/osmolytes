@@ -106,7 +106,12 @@ class SolventAccessibleSurface:
         with open(xyz_path, "wt") as xyz_file:
             for surface in self.surfaces:
                 for point in surface:
-                    xyz_file.write("%s\n" % fmt.format(name="P", x=point[0], y=point[1], z=point[2]))
+                    xyz_file.write(
+                        "%s\n"
+                        % fmt.format(
+                            name="P", x=point[0], y=point[1], z=point[2]
+                        )
+                    )
 
     def atom_surface_area(self, iatom):
         """Calculate surface area for this atom.
@@ -151,11 +156,11 @@ class SolventAccessibleSurface:
         atom2 = self.atoms[iatom2]
         if self.surfaces[iatom1] is not None:
             disp12 = self.surfaces[iatom1] - atom2.position
-            dist12 = np.sum(disp12**2, axis=1)
+            dist12 = np.sum(disp12 ** 2, axis=1)
             max12 = np.square(atom2.radius + self.probe_radius)
             self.surfaces[iatom1] = self.surfaces[iatom1][dist12 > max12]
         if self.surfaces[iatom2] is not None:
             disp21 = self.surfaces[iatom2] - atom1.position
-            dist21 = np.sum(disp21**2, axis=1)
+            dist21 = np.sum(disp21 ** 2, axis=1)
             max21 = np.square(atom1.radius + self.probe_radius)
             self.surfaces[iatom2] = self.surfaces[iatom2][dist21 > max21]
