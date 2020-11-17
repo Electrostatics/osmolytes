@@ -18,6 +18,17 @@ class Atom:
         :param str pqr_string:  line from PQR file for initializing structure
         """
         self.pqr_string = pqr_string
+        self.entry_type = None
+        self.pqr_atom_num = None
+        self.atom_name = None
+        self.res_name = None
+        self.chain_id = None
+        self.res_num = None
+        self.ins_code = None
+        self.position = None
+        self.charge = None
+        self.radius = None
+        self.neighbors = []
         self.parse_pqr(pqr_string)
 
     def parse_pqr(self, pqr_string):
@@ -45,10 +56,8 @@ class Atom:
             self.chain_id = words[4]
             chain_offset = 1
         else:
-            self.chain_id = None
             chain_offset = 0
         self.res_num = int(words[4 + chain_offset])
-        self.ins_code = None
         x = float(words[5 + chain_offset])
         y = float(words[6 + chain_offset])
         z = float(words[7 + chain_offset])
@@ -95,6 +104,16 @@ class Atom:
         outstr += str.rjust(ffradius, 7)[:7]
         return outstr
 
+    def distance2(self, other):
+        """Return the squared distance between this atom and another
+
+        :param Atom other:  other atom for computing distance
+        :returns:  squared distance
+        :rtype:  float
+        """
+        displacement = self.position - other.position
+        return np.inner(displacement, displacement)
+
 
 def parse_pqr_file(pqr_file):
     """Parse a PQR file.
@@ -108,7 +127,7 @@ def parse_pqr_file(pqr_file):
         line = line.strip()
         if line:
             words = line.split()
-            if words[0] == "REMARK":
+            if words[0] in ["HEADER", "REMARK"]:
                 pass
             elif words[0] in ["ATOM", "HETATM"]:
                 atoms.append(Atom(line))
