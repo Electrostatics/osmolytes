@@ -127,7 +127,7 @@ def parse_pqr_file(pqr_file):
         line = line.strip()
         if line:
             words = line.split()
-            if words[0] in ["HEADER", "REMARK"]:
+            if words[0] in ["HEADER", "REMARK", "TER"]:
                 pass
             elif words[0] in ["ATOM", "HETATM"]:
                 atoms.append(Atom(line))
