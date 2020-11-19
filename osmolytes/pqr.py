@@ -29,7 +29,8 @@ class Atom:
         self.charge = None
         self.radius = None
         self.neighbors = []
-        self.parse_pqr(pqr_string)
+        if pqr_string is not None:
+            self.parse_pqr(pqr_string)
 
     def parse_pqr(self, pqr_string):
         """Parse PQR string for atom.
