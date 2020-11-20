@@ -18,5 +18,5 @@ setuptools.setup(
     license="BSD",
     packages=setuptools.find_packages(),
     install_requires=["numpy", "scipy"],
-    tests_require=["pytest"],
+    tests_require=["pytest", "pandas"],
 )
