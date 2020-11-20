@@ -75,7 +75,7 @@ def sphere_cylinder(num):
     :param num:  target number of points on sphere
     :type num:  int
     :returns:  an array of (anum)-by-3 dimension where anum may not be
-        exactly the same as num 
+        exactly the same as num
     :rtype:  np.ndarray
     """
     num = int(np.sqrt(num))
