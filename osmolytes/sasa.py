@@ -10,7 +10,7 @@ _LOGGER = logging.getLogger(__name__)
 RADIUS_CUTOFF = 0.0001
 
 
-def sphere(num):
+def sphere_cube(num):
     """Discretize a sphere using points uniformly distributed on a cube.
 
     Discretize a unit sphere at the origin with a cube geodesic.
@@ -65,20 +65,50 @@ def sphere(num):
     return points
 
 
+def sphere_cylinder(num):
+    """Discretize a sphere using cylinder transform.
+
+    Discretize a unit sphere at the origin.
+
+    .. todo:: Fix duplicate points at poles
+
+    :param num:  target number of points on sphere
+    :type num:  int
+    :returns:  an array of (anum)-by-3 dimension where anum may not be
+        exactly the same as num 
+    :rtype:  np.ndarray
+    """
+    num = int(np.sqrt(num))
+    theta = np.linspace(0, 2 * np.pi, num, endpoint=False)
+    u = np.linspace(-1, 1, num)
+    theta_z = np.array([(t, z) for t in theta for z in u])
+    cos_theta = np.cos(theta_z[:, 0])
+    sin_theta = np.sin(theta_z[:, 0])
+    z2 = np.square(theta_z[:, 1])
+    r = np.sqrt(1 - z2)
+    x = r * cos_theta
+    y = r * sin_theta
+    z = theta_z[:, 1]
+    return np.array([x, y, z]).T
+
+
 class SolventAccessibleSurface:
     """Class for a Lee-Richards solvent-accessible surface."""
 
-    def __init__(self, atoms, probe_radius, num_points=1000):
+    def __init__(
+        self, atoms, probe_radius, num_points=1000, xyz_path="surface.xyz"
+    ):
         """Initialize the object.
 
         :param list(Atom) atoms:  list of atoms from which to construct surface
         :param float probe_radius:  radius of probe atom (solvent) in Angstroms
         :param int num_points:  number of points to use for reference sphere
+        :param str xyz_path:  path to xyz file (if None, no file is written)
         """
         self.atoms = atoms
         self.probe_radius = probe_radius
         self.num_points = num_points
-        self.sphere = sphere(num_points)
+        self.sphere = sphere_cube(num_points)
         self.max_radius = max([atom.radius for atom in self.atoms])
         self.max_search = self.max_radius + 2 * probe_radius
         # Set up atom surface reference spheres
@@ -100,18 +130,27 @@ class SolventAccessibleSurface:
         for i, j, distance in zip(matrix.row, matrix.col, matrix.data):
             if i != j:
                 self.prune_surfaces(i, j)
-        xyz_path = "debug.xyz"
+        # Dump surface
+        if xyz_path is None:
+            self.dump_xyz(xyz_path)
+
+    def dump_xyz(self, xyz_path):
+        """Dump surface in XYZ format.
+
+        :param str xyz_path:  path for XYZ-format data
+        """
         _LOGGER.warning("Writing debug coordinates to %s", xyz_path)
         fmt = "{name} {x:>8.3f} {y:>8.3f} {z:>8.3f}"
         with open(xyz_path, "wt") as xyz_file:
             for surface in self.surfaces:
-                for point in surface:
-                    xyz_file.write(
-                        "%s\n"
-                        % fmt.format(
-                            name="P", x=point[0], y=point[1], z=point[2]
+                if surface is not None:
+                    for point in surface:
+                        xyz_file.write(
+                            "%s\n"
+                            % fmt.format(
+                                name="P", x=point[0], y=point[1], z=point[2]
+                            )
                         )
-                    )
 
     def atom_surface_area(self, iatom):
         """Calculate surface area for this atom.
@@ -121,9 +160,14 @@ class SolventAccessibleSurface:
         :rtype:  float
         """
         num_ref = np.shape(self.sphere)[0]
-        num_surf = np.shape(self.surfaces[iatom])[0]
+        surf = self.surfaces[iatom]
+        if surf is not None:
+            num_surf = np.shape(surf)[0]
+        else:
+            num_surf = 0
         atom = self.atoms[iatom]
-        area = 4 * np.pi * np.square(atom.radius + self.probe_radius)
+        tot_radius = atom.radius + self.probe_radius
+        area = 4 * np.pi * tot_radius * tot_radius
         return area * float(num_surf) / float(num_ref)
 
     def surface_area_dictionary(self):
@@ -155,11 +199,27 @@ class SolventAccessibleSurface:
         atom1 = self.atoms[iatom1]
         atom2 = self.atoms[iatom2]
         if self.surfaces[iatom1] is not None:
+            # new_surf = []
+            # for surf in self.surfaces[iatom1]:
+            #     disp = surf - atom2.position
+            #     dist2 = np.sum(disp ** 2)
+            #     max2 = np.square(atom2.radius + self.probe_radius)
+            #     if dist2 > max2:
+            #         new_surf.append(surf)
+            # self.surfaces[iatom1] = new_surf
             disp12 = self.surfaces[iatom1] - atom2.position
             dist12 = np.sum(disp12 ** 2, axis=1)
             max12 = np.square(atom2.radius + self.probe_radius)
             self.surfaces[iatom1] = self.surfaces[iatom1][dist12 > max12]
         if self.surfaces[iatom2] is not None:
+            # new_surf = []
+            # for surf in self.surfaces[iatom2]:
+            #     disp = surf - atom1.position
+            #     dist2 = np.sum(disp ** 2)
+            #     max2 = np.square(atom1.radius + self.probe_radius)
+            #     if dist2 > max2:
+            #         new_surf.append(surf)
+            # self.surfaces[iatom2] = new_surf
             disp21 = self.surfaces[iatom2] - atom1.position
             dist21 = np.sum(disp21 ** 2, axis=1)
             max21 = np.square(atom1.radius + self.probe_radius)
