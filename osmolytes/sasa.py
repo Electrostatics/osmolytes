@@ -108,9 +108,10 @@ class SolventAccessibleSurface:
         self.atoms = atoms
         self.probe_radius = probe_radius
         self.num_points = num_points
-        self.sphere = sphere_cube(num_points)
+        self.sphere = sphere_cylinder(num_points)
         self.max_radius = max([atom.radius for atom in self.atoms])
-        self.max_search = self.max_radius + 2 * probe_radius
+        self.max_search = 2 * self.max_radius + 2 * probe_radius
+        _LOGGER.debug("max_search = %g", self.max_search)
         # Set up atom surface reference spheres
         self.surfaces = []
         for atom in self.atoms:
@@ -127,11 +128,22 @@ class SolventAccessibleSurface:
             self.tree, self.max_search, output_type="coo_matrix"
         )
         # Test individual surfaces
+        _LOGGER.debug(matrix)
         for i, j, distance in zip(matrix.row, matrix.col, matrix.data):
             if i != j:
-                self.prune_surfaces(i, j)
+                if np.isclose(distance, 0) and np.isclose(
+                    self.atoms[i].radius, self.atoms[j].radius
+                ):
+                    errstr = f"Overlapping atoms ({i}, {j}) of equal radius"
+                    _LOGGER.warning(errstr)
+                    if i < j:
+                        self.surfaces[i] = self.surfaces[i][0::2]
+                    else:
+                        self.surfaces[i] = self.surfaces[i][1::2]
+                else:
+                    self.prune_surface(i, j)
         # Dump surface
-        if xyz_path is None:
+        if xyz_path is not None:
             self.dump_xyz(xyz_path)
 
     def dump_xyz(self, xyz_path):
@@ -139,7 +151,7 @@ class SolventAccessibleSurface:
 
         :param str xyz_path:  path for XYZ-format data
         """
-        _LOGGER.warning("Writing debug coordinates to %s", xyz_path)
+        _LOGGER.debug("Writing debug coordinates to %s", xyz_path)
         fmt = "{name} {x:>8.3f} {y:>8.3f} {z:>8.3f}"
         with open(xyz_path, "wt") as xyz_file:
             for surface in self.surfaces:
@@ -190,37 +202,15 @@ class SolventAccessibleSurface:
                 area_dict[key] = area
         return area_dict
 
-    def prune_surfaces(self, iatom1, iatom2):
-        """Prune the surfaces for the specified atoms based on overlap.
+    def prune_surface(self, iatom1, iatom2):
+        """Prune the surface of atom1 based on the presence of atom2.
 
         :param int iatom1:  index of first atom
         :param int iatom2:  index of second atom
         """
-        atom1 = self.atoms[iatom1]
         atom2 = self.atoms[iatom2]
         if self.surfaces[iatom1] is not None:
-            # new_surf = []
-            # for surf in self.surfaces[iatom1]:
-            #     disp = surf - atom2.position
-            #     dist2 = np.sum(disp ** 2)
-            #     max2 = np.square(atom2.radius + self.probe_radius)
-            #     if dist2 > max2:
-            #         new_surf.append(surf)
-            # self.surfaces[iatom1] = new_surf
             disp12 = self.surfaces[iatom1] - atom2.position
             dist12 = np.sum(disp12 ** 2, axis=1)
             max12 = np.square(atom2.radius + self.probe_radius)
             self.surfaces[iatom1] = self.surfaces[iatom1][dist12 > max12]
-        if self.surfaces[iatom2] is not None:
-            # new_surf = []
-            # for surf in self.surfaces[iatom2]:
-            #     disp = surf - atom1.position
-            #     dist2 = np.sum(disp ** 2)
-            #     max2 = np.square(atom1.radius + self.probe_radius)
-            #     if dist2 > max2:
-            #         new_surf.append(surf)
-            # self.surfaces[iatom2] = new_surf
-            disp21 = self.surfaces[iatom2] - atom1.position
-            dist21 = np.sum(disp21 ** 2, axis=1)
-            max21 = np.square(atom1.radius + self.probe_radius)
-            self.surfaces[iatom2] = self.surfaces[iatom2][dist21 > max21]
