@@ -1,0 +1,54 @@
+read mol pqr NikR_chains.pqr end
+
+apolar name nikr_area_comps
+	grid 0.3 0.3 0.3
+	mol 1
+	srfm sacc
+	swin 0.3
+	srad 1.40
+	press 0.
+	gamma 1.
+	bconc 0.
+	sdens 100.0
+	dpos 0.2
+	temp 298.15
+	calcenergy comps
+	calcforce no
+end
+
+apolar name nikr_area_total
+	grid 0.3 0.3 0.3
+	mol 1
+	srfm sacc
+	swin 0.3
+	srad 1.40
+	press 0.
+	gamma 1.
+	bconc 0.
+	sdens 100.0
+	dpos 0.2
+	temp 298.15
+	calcenergy total
+	calcforce no
+end
+
+apolar name nikr_volume_total
+	grid 0.3 0.3 0.3
+	mol 1
+	srfm sacc
+	swin 0.3
+	srad 1.40
+	press 1.
+	gamma 0.
+	bconc 0.
+	sdens 100.0
+	dpos 0.2
+	temp 298.15
+	calcenergy total
+	calcforce no
+end
+
+print apolenergy nikr_area_total end
+print apolenergy nikr_volume_total end
+
+quit
