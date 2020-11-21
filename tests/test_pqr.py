@@ -56,7 +56,7 @@ PQR_DATA = [
 )
 def test_parsing(pqr_path, chain_id):
     """Test PQR parsing with and without chains"""
-    pqr_path = Path("tests/data") / pqr_path
+    pqr_path = Path("tests/data/proteins") / pqr_path
     with open(pqr_path) as pqr_file:
         atoms = parse_pqr_file(pqr_file)
         for iatom in range(40):
