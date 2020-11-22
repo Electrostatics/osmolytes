@@ -15,6 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 with open("tests/data/alkanes/alkanes.json", "rt") as json_file:
     ATOM_AREAS = json.load(json_file)
+PROTEIN_PATH = Path("tests/data/proteins")
 
 
 @pytest.mark.parametrize("radius", [0.25, 0.5, 1.0, 2.0, 4.0])
@@ -171,6 +172,7 @@ def test_two_sphere_sasa(radius, tmp_path):
 @pytest.mark.parametrize("molecule", list(ATOM_AREAS.keys()))
 def test_atom_sasa(molecule, tmp_path):
     """Test per-atom solvent-accessible surface areas for small molecules."""
+    _LOGGER.info("Temp path:  %s", tmp_path)
     atom_tolerance = 0.03
     total_tolerance = 0.03
     pqr_path = "%s.pdb" % molecule
@@ -178,7 +180,7 @@ def test_atom_sasa(molecule, tmp_path):
     with open(pqr_path, "rt") as pqr_file:
         atoms = parse_pqr_file(pqr_file)
     xyz_path = Path(tmp_path) / f"{molecule}.xyz"
-    sas = SolventAccessibleSurface(atoms, 0.65, 1000, xyz_path=xyz_path)
+    sas = SolventAccessibleSurface(atoms, 0.65, 4574, xyz_path=xyz_path)
     test_areas = np.array(
         [sas.atom_surface_area(iatom) for iatom in range(len(atoms))]
     )
@@ -187,15 +189,22 @@ def test_atom_sasa(molecule, tmp_path):
     ref_areas = ref_areas
     abs_diff = np.absolute(test_areas - ref_areas)
     rel_diff = abs_diff / np.sum(ref_areas)
+    keys = []
+    for atom in atoms:
+        keys.append(f"{atom.pqr_atom_num} {atom.atom_name}")
+    df = pd.DataFrame(
+        index=keys,
+        data={
+            "Ref values": ref_areas,
+            "Test values": test_areas,
+            "Abs diff": abs_diff,
+            "Rel diff": rel_diff,
+        },
+    )
+    _LOGGER.info("\n%s", df.sort_values("Abs diff", ascending=False))
     errors = []
     if np.any(rel_diff > atom_tolerance):
-        _LOGGER.warning(
-            f"Tolerance exceeded: {atom_tolerance}\n"
-            f"Reference areas:\n{ref_areas}\n"
-            f"Test areas:\n{ref_areas}\n"
-            f"Absolute differences:\n{abs_diff}\n"
-            f"Relative differences:\n{rel_diff}\n"
-        )
+        _LOGGER.error("\n%s", df.sort_values("Rel diff", ascending=False))
         errors.append(
             "Per-atom relative differences exceed tolerance (%g)"
             % atom_tolerance
@@ -214,5 +223,103 @@ def test_atom_sasa(molecule, tmp_path):
             "Total relative difference exceeds tolerance (%g)"
             % total_tolerance
         )
+    if errors:
+        raise AssertionError(";".join(errors))
+
+
+@pytest.mark.parametrize(
+    "pqr_path,ref_json", [("NikR_chains.pqr", "NikR.json")]
+)
+def test_proteins(pqr_path, ref_json, tmp_path):
+    """Test SASA performance for proteins."""
+    _LOGGER.info("Temp path:  %s", tmp_path)
+    abs_cutoff = 2.5
+    num_abs_cutoff = 26
+    rel_cutoff = 0.1
+    num_rel_cutoff = 33
+    tot_abs_cutoff = 24.0
+    tot_rel_cutoff = 0.002
+    pqr_path = PROTEIN_PATH / pqr_path
+    ref_json = PROTEIN_PATH / ref_json
+    with open(pqr_path, "rt") as pqr_file:
+        atoms = parse_pqr_file(pqr_file)
+    xyz_path = Path(tmp_path) / "surface.xyz"
+    sas = SolventAccessibleSurface(
+        atoms, probe_radius=1.4, num_points=5026, xyz_path=xyz_path
+    )
+    test_dict = {}
+    for iatom, atom in enumerate(atoms):
+        if atom.chain_id not in test_dict:
+            test_dict[atom.chain_id] = {}
+        chain_dict = test_dict[atom.chain_id]
+        residue_key = f"{atom.res_num} {atom.res_name}"
+        if residue_key not in chain_dict:
+            chain_dict[residue_key] = 0.0
+        chain_dict[residue_key] = chain_dict[
+            residue_key
+        ] + sas.atom_surface_area(iatom)
+        test_dict[atom.chain_id] = chain_dict
+    with open(ref_json, "rt") as ref_file:
+        ref_dict = json.load(ref_file)
+    keys = []
+    ref_values = []
+    test_values = []
+    for chain in ref_dict:
+        for res in ref_dict[chain]:
+            key = f"{chain} {res}"
+            keys.append(key)
+            ref_values.append(ref_dict[chain][res])
+            test_values.append(test_dict[chain][res])
+    ref_values = np.array(ref_values)
+    test_values = np.array(test_values)
+    abs_diff = np.absolute(ref_values - test_values)
+    rel_diff = np.divide(abs_diff, ref_values)
+    df = pd.DataFrame(
+        index=keys,
+        data={
+            "Ref values": ref_values,
+            "Test values": test_values,
+            "Abs diff": abs_diff,
+            "Rel diff": rel_diff,
+        },
+    )
+    _LOGGER.info(
+        "Largest absolute differences:\n%s", df.nlargest(20, "Abs diff")
+    )
+    df = df.dropna()
+    _LOGGER.info(
+        "Largest relative differences:\n%s", df.nlargest(20, "Rel diff")
+    )
+    errors = []
+    num_abs = len(abs_diff[abs_diff > abs_cutoff])
+    if num_abs > num_abs_cutoff:
+        err = (
+            f"Number of absolute differences ({num_abs}) above {abs_cutoff} "
+            f"exceeds limit ({num_abs_cutoff})"
+        )
+        errors.append(err)
+    num_rel = len(rel_diff[rel_diff > rel_cutoff])
+    if num_rel > num_rel_cutoff:
+        err = (
+            f"Number of relative differences ({num_rel}) above {rel_cutoff}) "
+            f"exceeds limit ({num_rel_cutoff})"
+        )
+        errors.append(err)
+    ref_total = np.sum(ref_values)
+    test_total = np.sum(test_values)
+    abs_total = np.absolute(ref_total - test_total)
+    if abs_total > tot_abs_cutoff:
+        err = (
+            f"Absolute difference in total area ({abs_total}) exceeds "
+            f"limit ({tot_abs_cutoff})"
+        )
+        errors.append(err)
+    rel_total = abs_total / ref_total
+    if rel_total > tot_rel_cutoff:
+        err = (
+            f"Relative difference in total area ({rel_total}) exceeds "
+            "limit ({tot_rel_cutoff})"
+        )
+        errors.append(err)
     if errors:
         raise AssertionError(";".join(errors))
