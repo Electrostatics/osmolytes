@@ -1,13 +1,24 @@
 """Calculate solvent-accessible surface areas using Lee-Richards method."""
 import logging
+import pkg_resources
+import yaml
 import numpy as np
 from scipy.spatial import cKDTree as Tree
-from osmolytes.pqr import Atom
 
 
 _LOGGER = logging.getLogger(__name__)
 # The value at which a radius is considered 0
 RADIUS_CUTOFF = 0.0001
+# Data files for reference states
+CREAMER_DATA_FILE = pkg_resources.resource_stream(
+    __name__, "data/creamer-areas.yaml"
+)
+DENATURED_DATA_FILE = pkg_resources.resource_stream(
+    __name__, "data/denatured-areas.yaml"
+)
+TRIPEPTIDE_DATA_FILE = pkg_resources.resource_stream(
+    __name__, "data/tripeptide-areas.yaml"
+)
 
 
 def sphere_cube(num):
@@ -30,7 +41,7 @@ def sphere_cube(num):
     # Generate faces
     for x in [0.0, 1.0]:
         face = np.array([(x, y_, z_) for y_ in edge for z_ in edge])
-        if not points is not None:
+        if points is None:
             points = face
         else:
             points = np.concatenate([points, face])
@@ -93,7 +104,8 @@ def sphere_cylinder(num):
 
 
 class SolventAccessibleSurface:
-    """Class for a Lee-Richards solvent-accessible surface."""
+    """Calculate Lee-Richards solvent-accessible surface area for folded
+    proteins."""
 
     def __init__(
         self, atoms, probe_radius, num_points=1000, xyz_path="surface.xyz"
@@ -214,3 +226,29 @@ class SolventAccessibleSurface:
             dist12 = np.sum(disp12 ** 2, axis=1)
             max12 = np.square(atom2.radius + self.probe_radius)
             self.surfaces[iatom1] = self.surfaces[iatom1][dist12 > max12]
+
+
+class ReferenceModels:
+    """Calculate solvent-accessible surface area for reference states.
+
+    Uses data and models from:
+    
+    - Creamer TP, Srinivasan R, Rose GD. Modeling unfolded states of proteins
+      and peptides. II. Backbone solvent accessibility. Biochemistry. 1997 Mar
+      11; 36(10):2832-5. doi: 10.1021/bi962819o. PMID: 9062111.
+    - Auton M, Bolen DW. Predicting the energetics of osmolyte-induced protein
+      folding/unfolding. Proc Natl Acad Sci U S A. 2005 Oct 18;102(42):
+      15065-8. doi: 10.1073/pnas.0507053102. Epub 2005 Oct 7. PMID: 16214887;
+      PMCID: PMC1257718.
+    """
+
+    def __init__(self):
+        self.creamer_dict = yaml.load(
+            CREAMER_DATA_FILE, Loader=yaml.FullLoader
+        )
+        self.denatured_dict = yaml.load(
+            DENATURED_DATA_FILE, Loader=yaml.FullLoader
+        )
+        self.tripeptide_dict = yaml.load(
+            TRIPEPTIDE_DATA_FILE, Loader=yaml.FullLoader
+        )

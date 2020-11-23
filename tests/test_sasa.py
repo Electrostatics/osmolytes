@@ -6,7 +6,7 @@ from random import uniform
 import pytest
 import numpy as np
 import pandas as pd
-from osmolytes.sasa import SolventAccessibleSurface
+from osmolytes.sasa import SolventAccessibleSurface, ReferenceModels
 from osmolytes.pqr import parse_pqr_file, Atom
 
 
@@ -323,3 +323,9 @@ def test_proteins(pqr_path, ref_json, tmp_path):
         errors.append(err)
     if errors:
         raise AssertionError(";".join(errors))
+
+
+def test_unfolded_sasa():
+    """Test unfolded SASA model."""
+    ref_models = ReferenceModels()
+    raise NotImplementedError("Reproduce values from Supporting Table 2 in Auton & Bolen PNAS paper")

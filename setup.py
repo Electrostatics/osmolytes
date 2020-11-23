@@ -17,6 +17,7 @@ setuptools.setup(
     python_requires=">=3.6",
     license="BSD",
     packages=setuptools.find_packages(),
-    install_requires=["numpy", "scipy"],
+    package_data={"": ["data/*.yaml", "tests/data/*.json"]},
+    install_requires=["numpy", "scipy", "pyyaml"],
     tests_require=["pytest", "pandas"],
 )
