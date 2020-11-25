@@ -1,0 +1,255 @@
+# Data from:  Auton M, Bolen DW. Predicting the energetics of osmolyte-induced
+# protein folding/unfolding. Proc Natl Acad Sci U S A. 2005 Oct 18;102(42):
+# 15065-8. doi: 10.1073/pnas.0507053102. Epub 2005 Oct 7. PMID: 16214887;
+# PMCID: PMC1257718.
+#
+# Surface area values from Supporting Table 2
+
+# RNase T1
+2BU4:
+  ALA:
+    number: 7
+    backbone: 148.4
+    sidechain: 167.1
+  ARG:
+    number: 1
+    backbone: 0
+    sidechain: 10.6
+  ASN:
+    number: 9
+    backbone: 106.0
+    sidechain: 522.1
+  ASP:
+    number: 6
+    backbone: 92.1
+    sidechain: 341.8
+  CYS:
+    number: 4
+    backbone: 69.0
+    sidechain: 75.8
+  GLN:
+    number: 2
+    backbone: 6.0
+    sidechain: 100.4
+  GLU:
+    number: 6
+    backbone: 94.3
+    sidechain: 354.4
+  GLY:
+    number: 12
+    backbone: 565.6
+    sidechain: 0
+  HIS:
+    number: 3
+    backbone: 19.0
+    sidechain: 128.4
+  ILE:
+    number: 2
+    backbone: 2.4
+    sidechain: 3.9
+  LEU:
+    number: 3
+    backbone: 29.7
+    sidechain: 112.2
+  LYS:
+    number: 2
+    backbone: 12.7
+    sidechain: 247.0
+  MET:
+    number: 0
+    backbone: 0
+    sidechain: 0
+  PHE:
+    number: 4
+    backbone: 35.9
+    sidechain: 45.7
+  PRO:
+    number: 4
+    backbone: 13.8
+    sidechain: 76.4
+  SER:
+    number: 15
+    backbone: 316.8
+    sidechain: 904.8
+  THR:
+    number: 6
+    backbone: 65.0
+    sidechain: 336.9
+  TRP:
+    number: 1
+    backbone: 0
+    sidechain: 1.1
+  TYR:
+    number: 9
+    backbone: 50.5
+    sidechain: 328.1
+  VAL:
+    number: 8
+    backbone: 39.9
+    sidechain: 174.6
+
+# SNase
+1STN:
+  ALA:
+    number: 12
+    backbone: 71.5
+    sidechain: 137.2
+  ARG:
+    number: 5
+    backbone: 14.5
+    sidechain: 368.7
+  ASN:
+    number: 5
+    backbone: 39.8
+    sidechain: 153.5
+  ASP:
+    number: 6
+    backbone: 51.5
+    sidechain: 110.6
+  CYS:
+    number: 0
+    backbone: 0
+    sidechain: 0
+  GLN:
+    number: 5
+    backbone: 12.7
+    sidechain: 465.4
+  GLU:
+    number: 11
+    backbone: 78.2
+    sidechain: 417.9
+  GLY:
+    number: 9
+    backbone: 213.3
+    sidechain: 0
+  HIS:
+    number: 4
+    backbone: 19.4
+    sidechain: 280.8
+  ILE:
+    number: 5
+    backbone: 68.3
+    sidechain: 114.1
+  LEU:
+    number: 11
+    backbone: 55.9
+    sidechain: 140.6
+  LYS:
+    number: 22
+    backbone: 476.8
+    sidechain: 2646.7
+  MET:
+    number: 4
+    backbone: 31.8
+    sidechain: 123.3
+  PHE:
+    number: 3
+    backbone: 7.0
+    sidechain: 64.7
+  PRO:
+    number: 6
+    backbone: 84.4
+    sidechain: 386.9
+  SER:
+    number: 3
+    backbone: 72.3
+    sidechain: 74.9
+  THR:
+    number: 8
+    backbone: 54.6
+    sidechain: 229.2
+  TRP:
+    number: 1
+    backbone: 18.9
+    sidechain: 40.7
+  TYR:
+    number: 7
+    backbone: 62.0
+    sidechain: 500.6
+  VAL:
+    number: 9
+    backbone: 62.7
+    sidechain: 83.2
+
+# P protein
+1A6F:
+  ALA:
+    number: 6
+    backbone: 105.6
+    sidechain: 153.6
+  ARG:
+    number: 11
+    backbone: 60.2
+    sidechain: 1202.5
+  ASN:
+    number: 6
+    backbone: 28.2
+    sidechain: 258.6
+  ASP:
+    number: 4
+    backbone: 26.6
+    sidechain: 212.8
+  CYS:
+    number: 0
+    backbone: 0
+    sidechain: 0
+  GLN:
+    number: 6
+    backbone: 38.1
+    sidechain: 346.9
+  GLU:
+    number: 9
+    backbone: 102.4
+    sidechain: 689.2
+  GLY:
+    number: 3
+    backbone: 82.2
+    sidechain: 0
+  HIS:
+    number: 3
+    backbone: 46.1
+    sidechain: 344.3
+  ILE:
+    number: 6
+    backbone: 15.2
+    sidechain: 43.2
+  LEU:
+    number: 13
+    backbone: 53.7
+    sidechain: 96.4
+  LYS:
+    number: 17
+    backbone: 196.1
+    sidechain: 1606.3
+  MET:
+    number: 1
+    backbone: 0
+    sidechain: 56.5
+  PHE:
+    number: 5
+    backbone: 12.5
+    sidechain: 83.9
+  PRO:
+    number: 2
+    backbone: 65.9
+    sidechain: 133.0
+  SER:
+    number: 7
+    backbone: 85.6
+    sidechain: 163.4
+  THR:
+    number: 4
+    backbone: 7.7
+    sidechain: 152.6
+  TRP:
+    number: 0
+    backbone: 0
+    sidechain: 0
+  TYR:
+    number: 4
+    backbone: 18.7
+    sidechain: 152.9
+  VAL:
+    number: 6
+    backbone: 33.1
+    sidechain: 143.3

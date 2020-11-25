@@ -4,10 +4,12 @@ import json
 from pathlib import Path
 from random import uniform
 import pytest
+import yaml
+from scipy.stats import linregress
 import numpy as np
 import pandas as pd
 from osmolytes.sasa import SolventAccessibleSurface, ReferenceModels
-from osmolytes.pqr import parse_pqr_file, Atom, aggregate
+from osmolytes.pqr import parse_pqr_file, Atom, aggregate, count_residues
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -261,13 +263,11 @@ def test_protein_details(pqr_path, ref_json, tmp_path):
     keys = []
     ref_values = []
     test_values = []
-    for chain, res in df.index:
-        value = df.loc[(chain, res)].values[0]
-        print(value)
-        key = f"{chain} {res}"
-        keys.append(key)
-        ref_values.append(ref_dict[chain][res])
-        test_values.append(value)
+    for chain in ref_dict.keys():
+        chain_df = df[df["chain_id"] == chain]
+        test_values = test_values + list(chain_df["value"].values)
+        keys = keys + [f"{chain} {key}" for key in ref_dict[chain].keys()]
+        ref_values = ref_values + list(ref_dict[chain].values())
     ref_values = np.array(ref_values)
     test_values = np.array(test_values)
     abs_diff = np.absolute(ref_values - test_values)
@@ -323,15 +323,50 @@ def test_protein_details(pqr_path, ref_json, tmp_path):
         raise AssertionError(";".join(errors))
 
 
-# @pytest.mark.parametrize(
-#     "pqr_path,ref_json", [("NikR_chains.pqr", "NikR.json")]
-# )
-# def test_protein_aggregate(tmp_path):
-#     """Test aggregate SASAs per residue type as reported in Auton and Bolen
-#     (doi:10.1073/pnas.0507053102, Supporting Table 2)."""
-#     raise NotImplementedError(
-#         "Reproduce values from Supporting Table 2 in Auton & Bolen PNAS paper"
-#     )
+@pytest.mark.parametrize("protein", ["1A6F", "1STN", "2BU4"])
+def test_protein_aggregate(protein, tmp_path):
+    """Test aggregate SASAs per residue type as reported in Auton and Bolen
+    (doi:10.1073/pnas.0507053102, Supporting Table 2)."""
+    _LOGGER.info("Temp path:  %s", tmp_path)
+    pqr_path = PROTEIN_PATH / f"{protein}.pqr"
+    with open(pqr_path, "rt") as pqr_file:
+        atoms = parse_pqr_file(pqr_file)
+    xyz_path = Path(tmp_path) / "surface.xyz"
+    sas = SolventAccessibleSurface(
+        atoms, probe_radius=1.4, num_points=5000, xyz_path=xyz_path
+    )
+    test_areas = [sas.atom_surface_area(iatom) for iatom in range(len(atoms))]
+    test_areas = aggregate(
+        atoms,
+        test_areas,
+        chain_id=False,
+        res_name=True,
+        res_num=False,
+        sidechain=True,
+    )
+    test_areas = test_areas.set_index("res_name").sort_index()
+    test_counts = np.array(count_residues(atoms))
+    ref_path = PROTEIN_PATH / "Auton-Bolen.yaml"
+    with open(ref_path, "rt") as ref_file:
+        ref_dict = yaml.load(ref_file, Loader=yaml.FullLoader)
+    ref_dict = ref_dict[protein]
+    ref_df = pd.DataFrame(ref_dict).T
+    ref_df = ref_df[ref_df["number"] > 0]
+    ref_counts = np.array(ref_df["number"].sort_index())
+    np.testing.assert_equal(test_counts, ref_counts)
+    for group in ["backbone", "sidechain"]:
+        ref = np.array(ref_df[group])
+        test = np.array(test_areas[test_areas["sidechain"] == group]["value"])
+        # Test correlation since we're not 100% sure what parameters were used
+        # in PNAS paper
+        results = linregress(ref, test)
+        info = (
+            f"{group} areas are correlated with results from paper:  {results}"
+        )
+        _LOGGER.info(info)
+        if not np.isclose(results.pvalue, 0):
+            err = f"Poor fit to {group} areas:  {results}"
+            raise AssertionError(err)
 
 
 # def test_unfolded_sasa():

@@ -3,6 +3,7 @@
 Parse and store parametrized molecular structure files.
 """
 import logging
+from collections import Counter, OrderedDict
 import numpy as np
 import pandas as pd
 
@@ -78,6 +79,12 @@ SIDECHAIN_ATOMS = {
     "HD1",
     "CG",
     "HG11",
+    "CZ2",
+    "CE3",
+    "CZ3",
+    "NE1",
+    "HH2",
+    "CH2",
 }
 
 
@@ -188,10 +195,27 @@ class Atom:
         return np.inner(displacement, displacement)
 
 
+def count_residues(atoms):
+    """Count residues by type
+
+    :param list(Atom) atoms:  array of atoms to count
+    :returns:  Series with counts
+    :rtype:  pd.Series
+    """
+    res_set = {(atom.res_num, atom.res_name) for atom in atoms}
+    counts = Counter()
+    for res_tup in res_set:
+        res_type = res_tup[1]
+        counts.update([res_type])
+    return pd.Series(counts).sort_index()
+
+
 def aggregate(
     atoms, data, chain_id=True, res_name=True, res_num=True, sidechain=True
 ):
     """Aggregate the array of data into a dictionary.
+
+    .. todo::  This is a horrible kludge.
 
     :param list(Atom) atoms:  array of atoms over which to aggregate data
     :param list(float) data:  array of data to aggregate
@@ -202,41 +226,46 @@ def aggregate(
     :returns:  DataFrame with aggregated data
     :rtype:  pd.DataFrame
     """
-    rows = []
+    aggregate = OrderedDict()
     unknown_atoms = set()
     unknown_error = False
     for iatom, atom in enumerate(atoms):
-        row = {}
-        row["chain_id"] = atom.chain_id
-        row["res_name"] = atom.res_name
-        row["res_num"] = f"{atom.res_num} {atom.res_name}"
-        if atom.atom_name in BACKBONE_ATOMS:
-            row["sidechain"] = False
-        elif atom.atom_name in SIDECHAIN_ATOMS:
-            row["sidechain"] = True
+        key = []
+        if chain_id:
+            key.append(atom.chain_id)
+        if res_name:
+            key.append(atom.res_name)
+        if res_num:
+            key.append(str(atom.res_num))
+        if sidechain:
+            if atom.atom_name in BACKBONE_ATOMS:
+                key.append("backbone")
+            elif atom.atom_name in SIDECHAIN_ATOMS:
+                key.append("sidechain")
+        key = " ".join(key)
+        if key in aggregate:
+            aggregate[key] = aggregate[key] + data[iatom]
         else:
-            unknown_atoms.add(atom.atom_name)
-            unknown_error = True
-        row["data"] = data[iatom]
-        rows.append(row)
+            aggregate[key] = data[iatom]
     if unknown_error:
         err = f"Unknown atom types:  {unknown_atoms}"
         raise ValueError(err)
-    df = pd.DataFrame(rows)
-    group_list = []
-    drop_list = []
-    for name, value in [
-        ("chain_id", chain_id),
-        ("res_name", res_name),
-        ("res_num", res_num),
-        ("sidechain", sidechain),
-    ]:
-        if value:
-            group_list.append(name)
-        else:
-            drop_list.append(name)
-    df = df.drop(drop_list, axis="columns")
-    df = df.groupby(group_list).sum()
+    rows = []
+    for key, value in aggregate.items():
+        row = key.split()
+        row.append(value)
+        rows.append(row)
+    columns = []
+    if chain_id:
+        columns.append("chain_id")
+    if res_name:
+        columns.append("res_name")
+    if res_num:
+        columns.append("res_num")
+    if sidechain:
+        columns.append("sidechain")
+    columns.append("value")
+    df = pd.DataFrame(rows, columns=columns)
     return df
 
 
@@ -252,7 +281,14 @@ def parse_pqr_file(pqr_file):
         line = line.strip()
         if line:
             words = line.split()
-            if words[0] in ["HEADER", "REMARK", "TER", "COMPND", "AUTHOR"]:
+            if words[0] in [
+                "HEADER",
+                "REMARK",
+                "TER",
+                "COMPND",
+                "AUTHOR",
+                "END",
+            ]:
                 pass
             elif words[0] in ["ATOM", "HETATM"]:
                 atoms.append(Atom(line))
