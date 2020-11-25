@@ -10,14 +10,17 @@ _LOGGER = logging.getLogger(__name__)
 # The value at which a radius is considered 0
 RADIUS_CUTOFF = 0.0001
 # Data files for reference states
-CREAMER_DATA_FILE = pkg_resources.resource_stream(
-    __name__, "data/creamer-areas.yaml"
+CREAMER_DICT = yaml.load(
+    pkg_resources.resource_stream(__name__, "data/creamer-areas.yaml"),
+    Loader=yaml.FullLoader,
 )
-DENATURED_DATA_FILE = pkg_resources.resource_stream(
-    __name__, "data/denatured-areas.yaml"
+AUTON_DICT = yaml.load(
+    pkg_resources.resource_stream(__name__, "data/denatured-areas.yaml"),
+    Loader=yaml.FullLoader,
 )
-TRIPEPTIDE_DATA_FILE = pkg_resources.resource_stream(
-    __name__, "data/tripeptide-areas.yaml"
+TRIPEPTIDE_DICT = yaml.load(
+    pkg_resources.resource_stream(__name__, "data/tripeptide-areas.yaml"),
+    Loader=yaml.FullLoader,
 )
 
 
@@ -232,7 +235,7 @@ class ReferenceModels:
     """Calculate solvent-accessible surface area for reference states.
 
     Uses data and models from:
-    
+
     - Creamer TP, Srinivasan R, Rose GD. Modeling unfolded states of proteins
       and peptides. II. Backbone solvent accessibility. Biochemistry. 1997 Mar
       11; 36(10):2832-5. doi: 10.1021/bi962819o. PMID: 9062111.
@@ -243,12 +246,59 @@ class ReferenceModels:
     """
 
     def __init__(self):
-        self.creamer_dict = yaml.load(
-            CREAMER_DATA_FILE, Loader=yaml.FullLoader
-        )
-        self.denatured_dict = yaml.load(
-            DENATURED_DATA_FILE, Loader=yaml.FullLoader
-        )
-        self.tripeptide_dict = yaml.load(
-            TRIPEPTIDE_DATA_FILE, Loader=yaml.FullLoader
-        )
+        self._creamer_dict = CREAMER_DICT
+        self._auton_dict = AUTON_DICT
+        self._tripeptide_dict = TRIPEPTIDE_DICT
+
+    def denatured_area(
+        self, residue, model="auton", what="total", how="mean"
+    ):
+        """Return denatured area for the given residue.
+
+        :param str residue:  3-letter residue name
+        :param str model:  model to use
+
+          - creamer: Creamer, Srinivasan, Rose. doi: 10.1021/bi962819o
+          - auton: Auton, Bolen. doi: 10.1073/pnas.0507053102
+
+        :param str what:  what area to report
+
+          - sidechain
+          - backbone
+          - total
+
+        :param str how:  calculation to perform on model values
+
+          - max
+          - min
+          - mean
+
+        :returns:  model value
+        :rtype:  float
+        """
+        what = what.lower()
+        residue = residue.upper()
+        model = model.lower()
+        how = how.lower()
+        if what == "total":
+            return self.denatured_area(
+                residue, model, "sidechain", how
+            ) + self.denatured_area(residue, model, "backbone", how)
+        if what not in ["sidechain", "backbone"]:
+            err = f"Unkown group for area calculation: {what}"
+            raise ValueError(err)
+        if model == "creamer":
+            values = self._creamer_dict[residue][what]
+        elif model == "auton":
+            values = [self._auton_dict[residue][what]]
+        else:
+            err = f"Unknown model: {model}"
+            raise ValueError(err)
+        if how == "max":
+            return np.max(values)
+        if how == "min":
+            return np.min(values)
+        if how == "mean":
+            return np.mean(values)
+        err = f"Unknown calculation: {how}"
+        raise ValueError(err)
