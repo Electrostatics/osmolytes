@@ -7,7 +7,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from osmolytes.sasa import SolventAccessibleSurface, ReferenceModels
-from osmolytes.pqr import parse_pqr_file, Atom
+from osmolytes.pqr import parse_pqr_file, Atom, aggregate
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ def test_atom_sasa(molecule, tmp_path):
 @pytest.mark.parametrize(
     "pqr_path,ref_json", [("NikR_chains.pqr", "NikR.json")]
 )
-def test_proteins(pqr_path, ref_json, tmp_path):
+def test_protein_details(pqr_path, ref_json, tmp_path):
     """Test SASA performance for proteins."""
     _LOGGER.info("Temp path:  %s", tmp_path)
     abs_cutoff = 2.5
@@ -247,29 +247,27 @@ def test_proteins(pqr_path, ref_json, tmp_path):
     sas = SolventAccessibleSurface(
         atoms, probe_radius=1.4, num_points=5026, xyz_path=xyz_path
     )
-    test_dict = {}
-    for iatom, atom in enumerate(atoms):
-        if atom.chain_id not in test_dict:
-            test_dict[atom.chain_id] = {}
-        chain_dict = test_dict[atom.chain_id]
-        residue_key = f"{atom.res_num} {atom.res_name}"
-        if residue_key not in chain_dict:
-            chain_dict[residue_key] = 0.0
-        chain_dict[residue_key] = chain_dict[
-            residue_key
-        ] + sas.atom_surface_area(iatom)
-        test_dict[atom.chain_id] = chain_dict
+    test_areas = [sas.atom_surface_area(iatom) for iatom in range(len(atoms))]
+    df = aggregate(
+        atoms,
+        test_areas,
+        chain_id=True,
+        res_name=False,
+        res_num=True,
+        sidechain=False,
+    )
     with open(ref_json, "rt") as ref_file:
         ref_dict = json.load(ref_file)
     keys = []
     ref_values = []
     test_values = []
-    for chain in ref_dict:
-        for res in ref_dict[chain]:
-            key = f"{chain} {res}"
-            keys.append(key)
-            ref_values.append(ref_dict[chain][res])
-            test_values.append(test_dict[chain][res])
+    for chain, res in df.index:
+        value = df.loc[(chain, res)].values[0]
+        print(value)
+        key = f"{chain} {res}"
+        keys.append(key)
+        ref_values.append(ref_dict[chain][res])
+        test_values.append(value)
     ref_values = np.array(ref_values)
     test_values = np.array(test_values)
     abs_diff = np.absolute(ref_values - test_values)
@@ -325,7 +323,20 @@ def test_proteins(pqr_path, ref_json, tmp_path):
         raise AssertionError(";".join(errors))
 
 
-def test_unfolded_sasa():
-    """Test unfolded SASA model."""
-    ref_models = ReferenceModels()
-    raise NotImplementedError("Reproduce values from Supporting Table 2 in Auton & Bolen PNAS paper")
+# @pytest.mark.parametrize(
+#     "pqr_path,ref_json", [("NikR_chains.pqr", "NikR.json")]
+# )
+# def test_protein_aggregate(tmp_path):
+#     """Test aggregate SASAs per residue type as reported in Auton and Bolen
+#     (doi:10.1073/pnas.0507053102, Supporting Table 2)."""
+#     raise NotImplementedError(
+#         "Reproduce values from Supporting Table 2 in Auton & Bolen PNAS paper"
+#     )
+
+
+# def test_unfolded_sasa():
+#     """Test unfolded SASA model."""
+#     ref_models = ReferenceModels()
+#     raise NotImplementedError(
+#         "Reproduce values from Supporting Table 2 in Auton & Bolen PNAS paper"
+#     )

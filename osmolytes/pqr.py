@@ -4,9 +4,81 @@ Parse and store parametrized molecular structure files.
 """
 import logging
 import numpy as np
+import pandas as pd
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+BACKBONE_ATOMS = {"OXT", "H2", "H3", "H", "C", "O", "N", "HA", "HA2", "CA"}
+SIDECHAIN_ATOMS = {
+    "CB",
+    "HH21",
+    "OE1",
+    "HZ",
+    "HD22",
+    "HZ1",
+    "HH22",
+    "CZ",
+    "OE2",
+    "NE",
+    "CE1",
+    "CD",
+    "HG2",
+    "HB1",
+    "HD12",
+    "NE2",
+    "HG12",
+    "SG",
+    "HH11",
+    "HB",
+    "HE21",
+    "HD23",
+    "CG1",
+    "HA3",
+    "HE22",
+    "HD11",
+    "OH",
+    "HG23",
+    "HE",
+    "HH",
+    "HD21",
+    "SD",
+    "OG",
+    "HZ3",
+    "HB2",
+    "HD3",
+    "NH1",
+    "HH12",
+    "HD2",
+    "HG1",
+    "NZ",
+    "HE2",
+    "OD1",
+    "HB3",
+    "ND1",
+    "CG2",
+    "HG3",
+    "HE3",
+    "HG13",
+    "CE",
+    "OD2",
+    "HE1",
+    "HG21",
+    "NH2",
+    "HD13",
+    "CD2",
+    "HG22",
+    "OG1",
+    "CD1",
+    "HG",
+    "CE2",
+    "ND2",
+    "HZ2",
+    "HD1",
+    "CG",
+    "HG11",
+}
 
 
 class Atom:
@@ -114,6 +186,58 @@ class Atom:
         """
         displacement = self.position - other.position
         return np.inner(displacement, displacement)
+
+
+def aggregate(
+    atoms, data, chain_id=True, res_name=True, res_num=True, sidechain=True
+):
+    """Aggregate the array of data into a dictionary.
+
+    :param list(Atom) atoms:  array of atoms over which to aggregate data
+    :param list(float) data:  array of data to aggregate
+    :param bool chain_id:  whether to aggregate by chain
+    :param bool res_name:  whether to aggregate by residue type
+    :param bool res_num:  whether to aggregate by residue number
+    :param bool sidechain:  whether to aggregate by sidechain/backbone
+    :returns:  DataFrame with aggregated data
+    :rtype:  pd.DataFrame
+    """
+    rows = []
+    unknown_atoms = set()
+    unknown_error = False
+    for iatom, atom in enumerate(atoms):
+        row = {}
+        row["chain_id"] = atom.chain_id
+        row["res_name"] = atom.res_name
+        row["res_num"] = f"{atom.res_num} {atom.res_name}"
+        if atom.atom_name in BACKBONE_ATOMS:
+            row["sidechain"] = False
+        elif atom.atom_name in SIDECHAIN_ATOMS:
+            row["sidechain"] = True
+        else:
+            unknown_atoms.add(atom.atom_name)
+            unknown_error = True
+        row["data"] = data[iatom]
+        rows.append(row)
+    if unknown_error:
+        err = f"Unknown atom types:  {unknown_atoms}"
+        raise ValueError(err)
+    df = pd.DataFrame(rows)
+    group_list = []
+    drop_list = []
+    for name, value in [
+        ("chain_id", chain_id),
+        ("res_name", res_name),
+        ("res_num", res_num),
+        ("sidechain", sidechain),
+    ]:
+        if value:
+            group_list.append(name)
+        else:
+            drop_list.append(name)
+    df = df.drop(drop_list, axis="columns")
+    df = df.groupby(group_list).sum()
+    return df
 
 
 def parse_pqr_file(pqr_file):
