@@ -1,7 +1,6 @@
 """Test m-value prediction model."""
 import logging
 from pathlib import Path
-import pytest
 import pandas as pd
 import numpy as np
 from scipy.stats import linregress
