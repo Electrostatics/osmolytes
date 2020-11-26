@@ -2,7 +2,6 @@
 import logging
 import json
 from pathlib import Path
-from random import uniform
 import pytest
 import yaml
 from scipy.stats import linregress
@@ -360,7 +359,10 @@ def test_protein_aggregate(protein, tmp_path):
         # Test correlation since we're not 100% sure what parameters were used
         # in PNAS paper
         results = linregress(ref, test)
-        info = f"{group} areas are correlated with results from paper:  {results}"
+        info = (
+            f"{group} areas are correlated with results from paper:  "
+            f"{results}"
+        )
         _LOGGER.info(info)
         if not np.isclose(results.pvalue, 0):
             err = f"Poor fit to {group} areas:  {results}"
@@ -395,19 +397,21 @@ def test_protein_aggregate(protein, tmp_path):
 def test_unfolded_sasa(amino_acid):
     """Test unfolded SASA model."""
     ref_models = ReferenceModels()
-    val1 = ref_models.denatured_area(amino_acid, model="auton")
-    val2 = ref_models.denatured_area(amino_acid, model="creamer")
+    val1 = ref_models.residue_area(amino_acid, model="auton")
+    val2 = ref_models.residue_area(amino_acid, model="creamer")
     abs_err = np.absolute(val1 - val2)
     rel_err = 2 * abs_err / (val1 + val2)
     _LOGGER.debug(
         f"{amino_acid}: Auton ({val1:.2f}) and Creamer ({val2:.2f}) differ by "
-        f"{abs_err:.2f} (relative error {rel_err:e}).")
+        f"{abs_err:.2f} (relative error {rel_err:e})."
+    )
     # 0.10 accounts for rounding error between the two papers
     if abs_err > 0.101:
         if amino_acid != "PHE":
-            err = f"Absolute error ({abs_err}) exceeds 0.10 round-off tolerance"
+            err = f"Absolute error ({abs_err}) > 0.10 (round-off tolerance)"
             raise AssertionError(err)
         _LOGGER.error(
-            f"{amino_acid}: Auton ({val1:.2f}) and Creamer ({val2:.2f}) differ "
+            f"{amino_acid}: Auton ({val1:.2f}) & Creamer ({val2:.2f}) differ "
             f"by {abs_err:.2f} (relative error {rel_err:e}) -- error in Auton "
-            f"value?")
+            f"value?"
+        )

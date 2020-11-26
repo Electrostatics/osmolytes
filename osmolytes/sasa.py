@@ -3,7 +3,9 @@ import logging
 import pkg_resources
 import yaml
 import numpy as np
+import pandas as pd
 from scipy.spatial import cKDTree as Tree
+from osmolytes.pqr import count_residues
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -250,16 +252,66 @@ class ReferenceModels:
         self._auton_dict = AUTON_DICT
         self._tripeptide_dict = TRIPEPTIDE_DICT
 
-    def denatured_area(
-        self, residue, model="auton", what="total", how="mean"
-    ):
-        """Return denatured area for the given residue.
+    def residue_area(self, residue, model, how="mean"):
+        """Return reference area for the given residue type.
 
         :param str residue:  3-letter residue name
         :param str model:  model to use
 
-          - creamer: Creamer, Srinivasan, Rose. doi: 10.1021/bi962819o
-          - auton: Auton, Bolen. doi: 10.1073/pnas.0507053102
+          - creamer: denatured areas from Creamer, Srinivasan, Rose.
+            doi: 10.1021/bi962819o
+          - auton: denatured areas from Auton, Bolen
+            doi: 10.1073/pnas.0507053102
+          - tripeptide:  Gly-X-Gly areas for residue X from Auton, Bolen
+            doi: 10.1073/pnas.0507053102
+
+        :param str how:  calculation to perform on model values
+
+          - max
+          - min
+          - mean
+
+        :returns:  model values for sidechain and backbone
+        :rtype:  dict
+        """
+        residue = residue.upper()
+        model = model.lower()
+        how = how.lower()
+        areas = {}
+        for what in ["sidechain", "backbone"]:
+            if model == "creamer":
+                values = self._creamer_dict[residue][what]
+            elif model == "auton":
+                values = [self._auton_dict[residue][what]]
+            elif model == "tripeptide":
+                values = [self._tripeptide_dict[residue][what]]
+            else:
+                err = f"Unknown model: {model}"
+                raise ValueError(err)
+            if how == "max":
+                value = np.max(values)
+            elif how == "min":
+                value = np.min(values)
+            elif how == "mean":
+                value = np.mean(values)
+            else:
+                err = f"Unknown calculation: {how}"
+                raise ValueError(err)
+            areas[what] = value
+        return areas
+
+    def molecule_areas(self, atoms, model, how="mean"):
+        """Return reference areas for the molecule.
+
+        :param list(pqr.Atom) residue:  list of atoms in molecule
+        :param str model:  model to use
+
+          - creamer: denatured areas from Creamer, Srinivasan, Rose.
+            doi: 10.1021/bi962819o
+          - auton: denatured areas from Auton, Bolen
+            doi: 10.1073/pnas.0507053102
+          - tripeptide:  Gly-X-Gly areas for residue X from Auton, Bolen
+            doi: 10.1073/pnas.0507053102
 
         :param str what:  what area to report
 
@@ -273,32 +325,15 @@ class ReferenceModels:
           - min
           - mean
 
-        :returns:  model value
-        :rtype:  float
+        :returns:  DataFrame with a row for each residue type
+        :rtype:  pd.DataFrame
         """
-        what = what.lower()
-        residue = residue.upper()
-        model = model.lower()
-        how = how.lower()
-        if what == "total":
-            return self.denatured_area(
-                residue, model, "sidechain", how
-            ) + self.denatured_area(residue, model, "backbone", how)
-        if what not in ["sidechain", "backbone"]:
-            err = f"Unkown group for area calculation: {what}"
-            raise ValueError(err)
-        if model == "creamer":
-            values = self._creamer_dict[residue][what]
-        elif model == "auton":
-            values = [self._auton_dict[residue][what]]
-        else:
-            err = f"Unknown model: {model}"
-            raise ValueError(err)
-        if how == "max":
-            return np.max(values)
-        if how == "min":
-            return np.min(values)
-        if how == "mean":
-            return np.mean(values)
-        err = f"Unknown calculation: {how}"
-        raise ValueError(err)
+        count = count_residues(atoms)
+        rows = {}
+        for res, num in count.iteritems():
+            res_areas = self.residue_area(res, model, how)
+            row = {}
+            for what in ["sidechain", "backbone"]:
+                row[what] = num * res_areas[what]
+            rows[res] = row
+        return pd.DataFrame(rows).T.sort_index()

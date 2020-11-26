@@ -114,6 +114,9 @@ class Atom:
     def parse_pqr(self, pqr_string):
         """Parse PQR string for atom.
 
+        .. todo:: look for charge variations not captured by naming scheme
+                  (e.g., ASH vs. ASP)
+
         :param str pqr_string:  line from PQR file for initializing structure
         """
         line = pqr_string.strip()
