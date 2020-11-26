@@ -45,6 +45,15 @@ ASP:
   sorbitol: -83.88
   sucrose: -37.17
   urea: 3.55
+# Cysteine is not measureable because of oxidation and precipitation in solution
+CYS:
+  TMAO: 0
+  sarcosine: 0
+  betaine: 0
+  proline: 0
+  sorbitol: 0
+  sucrose: 0
+  urea: 0
 GLN:
   TMAO: 41.41
   sarcosine: -10.19
@@ -61,6 +70,7 @@ GLU:
   sorbitol: -70.05
   sucrose: -41.65
   urea: 0.62
+# Glycine is a reference state
 GLY:
   TMAO: 0
   sarcosine: 0

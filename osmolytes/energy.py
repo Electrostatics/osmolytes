@@ -18,7 +18,7 @@ from osmolytes.sasa import ReferenceModels
 _LOGGER = logging.getLogger(__name__)
 ENERGY_DICT = yaml.load(
     pkg_resources.resource_stream(__name__, "data/transfer-energies.yaml"),
-    Loader=yaml.FullLoader
+    Loader=yaml.FullLoader,
 )
 
 
@@ -58,7 +58,7 @@ def transfer_energy(atoms, sas):
 
     :param list(pqr.Atom) atoms:  list of atoms
     :param SolventAccessibleSurface sas: solvent-accessible surface area object
-    :returns:  DataFrame with energy contribution by residue type
+    :returns:  DataFrame with energy contribution (kcal/mol) by residue type
     :rtype:  pd.DataFrame
     """
     ref_model = ReferenceModels()
@@ -71,14 +71,21 @@ def transfer_energy(atoms, sas):
         atoms, model="tripeptide", how="mean"
     )
     scaled_areas = (unfolded_areas - folded_areas) / tripeptide_areas
+    scaled_areas["sidechain"]["GLY"] = 0.0
     osmolytes = list(ENERGY_DICT["backbone"].keys())
     residue_energies = {}
     bb_energy = {osmolyte: 0.0 for osmolyte in osmolytes}
     for res, area in scaled_areas.T.iteritems():
         sc_energy = {}
         for osmolyte in osmolytes:
-            sc_energy[osmolyte] = counts[res] * ENERGY_DICT[res][osmolyte] * area["sidechain"]
-            bb_energy[osmolyte] += counts[res] * ENERGY_DICT["backbone"][osmolyte] * area["backbone"]
+            sc_energy[osmolyte] = (
+                counts[res] * ENERGY_DICT[res][osmolyte] * area["sidechain"]
+            )
+            bb_energy[osmolyte] += (
+                counts[res]
+                * ENERGY_DICT["backbone"][osmolyte]
+                * area["backbone"]
+            )
         residue_energies[res] = sc_energy
     residue_energies["backbone"] = bb_energy
-    return pd.DataFrame(residue_energies).T
+    return pd.DataFrame(residue_energies).T / 1000
