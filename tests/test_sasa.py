@@ -33,6 +33,9 @@ def test_one_sphere_sasa(radius, tmp_path):
     )
     atom_sasa = sas.atom_surface_area(0)
     ref_sasa = 4.0 * np.pi * radius * radius
+    _LOGGER.info(
+        f"Radius: {radius}, Test area: {atom_sasa}, Ref area: {ref_sasa}"
+    )
     np.testing.assert_almost_equal(atom_sasa, ref_sasa)
 
 
@@ -126,7 +129,7 @@ def test_two_sphere_sasa(radius, tmp_path):
         abs_diff_df.index.name = "Dist"
         rel_diff_df = pd.DataFrame(index=distances, data=rel_difference)
         rel_diff_df.index.name = "Dist"
-        _LOGGER.error(
+        _LOGGER.info(
             f"\nTolerance exceeded: {atom_tolerance}\n"
             f"\nRadii: {little_atom.radius}, {big_atom.radius}\n"
             f"\nReference total areas:\n{ref_series}\n"
@@ -323,7 +326,7 @@ def test_protein_details(pqr_path, ref_json, tmp_path):
 
 
 @pytest.mark.parametrize("protein", ["1A6F", "1STN", "2BU4"])
-def test_protein_aggregate(protein, tmp_path):
+def test_auton_sasa(protein, tmp_path):
     """Test aggregate SASAs per residue type as reported in Auton and Bolen
     (doi:10.1073/pnas.0507053102, Supporting Table 2)."""
     _LOGGER.info("Temp path:  %s", tmp_path)
@@ -395,23 +398,24 @@ def test_protein_aggregate(protein, tmp_path):
     ],
 )
 def test_unfolded_sasa(amino_acid):
-    """Test unfolded SASA model."""
+    """Test unfolded SASA models by comparing results of Auton and Bolen
+    (doi:10.1073/pnas.0507053102) with Creamer et al
+    (doi:10.1021/bi962819o)."""
+    err_tol = 0.101
     ref_models = ReferenceModels()
-    val1 = ref_models.residue_area(amino_acid, model="auton")
-    val2 = ref_models.residue_area(amino_acid, model="creamer")
+    val1 = pd.Series(ref_models.residue_area(amino_acid, model="auton"))
+    val2 = pd.Series(ref_models.residue_area(amino_acid, model="creamer"))
+    print(val1, val2)
     abs_err = np.absolute(val1 - val2)
     rel_err = 2 * abs_err / (val1 + val2)
-    _LOGGER.debug(
-        f"{amino_acid}: Auton ({val1:.2f}) and Creamer ({val2:.2f}) differ by "
-        f"{abs_err:.2f} (relative error {rel_err:e})."
+    diag_str = (
+        f"{amino_acid}:\nAuton:\n{val1}\nCreamer:\n{val2}\n"
+        f"Abs error:\n{abs_err}\nRel error:\n{rel_err})\n"
     )
+    _LOGGER.info(diag_str)
     # 0.10 accounts for rounding error between the two papers
-    if abs_err > 0.101:
+    if np.any(abs_err > err_tol):
         if amino_acid != "PHE":
-            err = f"Absolute error ({abs_err}) > 0.10 (round-off tolerance)"
+            err = f"Error tolerance {err_tol} exceeded for {diag_str}"
             raise AssertionError(err)
-        _LOGGER.error(
-            f"{amino_acid}: Auton ({val1:.2f}) & Creamer ({val2:.2f}) differ "
-            f"by {abs_err:.2f} (relative error {rel_err:e}) -- error in Auton "
-            f"value?"
-        )
+        _LOGGER.error(f"{diag_str}\nError in Auton value?")
