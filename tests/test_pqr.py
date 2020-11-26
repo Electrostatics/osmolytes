@@ -1,11 +1,14 @@
 """Test PQR parsing."""
+import logging
 import pytest
 from pathlib import Path
-from numpy import array
-from numpy.testing import assert_almost_equal
-from osmolytes.pqr import parse_pqr_file
+import yaml
+import numpy as np
+import pandas as pd
+from osmolytes.pqr import parse_pqr_file, count_residues
 
 
+_LOGGER = logging.getLogger(__name__)
 PQR_DATA = [
     ["ATOM", 1, "N", "MET", 1, -22.600, 7.684, -9.315, -0.3200, 2.0000],
     ["ATOM", 2, "CA", "MET", 1, -21.455, 8.620, -9.099, 0.3300, 2.0000],
@@ -48,6 +51,7 @@ PQR_DATA = [
     ["ATOM", 39, "C", "ARG", 3, -20.291, 15.253, -4.763, 0.5500, 1.7000],
     ["ATOM", 40, "O", "ARG", 3, -21.384, 15.807, -4.617, -0.5500, 1.4000],
 ]
+PROTEIN_PATH = Path("tests/data/proteins")
 
 
 @pytest.mark.parametrize(
@@ -56,7 +60,7 @@ PQR_DATA = [
 )
 def test_parsing(pqr_path, chain_id):
     """Test PQR parsing with and without chains"""
-    pqr_path = Path("tests/data/proteins") / pqr_path
+    pqr_path = PROTEIN_PATH / pqr_path
     with open(pqr_path) as pqr_file:
         atoms = parse_pqr_file(pqr_file)
         for iatom in range(40):
@@ -68,7 +72,33 @@ def test_parsing(pqr_path, chain_id):
             assert test_atom.res_name == ref_atom[3]
             assert test_atom.res_num == ref_atom[4]
             assert test_atom.chain_id == chain_id
-            ref_pos = array([ref_atom[5], ref_atom[6], ref_atom[7]])
-            assert_almost_equal(test_atom.position, ref_pos, decimal=3)
-            assert_almost_equal(test_atom.charge, ref_atom[8], decimal=3)
-            assert_almost_equal(test_atom.radius, ref_atom[9], decimal=3)
+            ref_pos = np.array([ref_atom[5], ref_atom[6], ref_atom[7]])
+            np.testing.assert_almost_equal(
+                test_atom.position, ref_pos, decimal=3
+            )
+            np.testing.assert_almost_equal(
+                test_atom.charge, ref_atom[8], decimal=3
+            )
+            np.testing.assert_almost_equal(
+                test_atom.radius, ref_atom[9], decimal=3
+            )
+
+
+@pytest.mark.parametrize("protein", ["1A6F", "1STN", "2BU4"])
+def test_residue_count(protein):
+    """Test aggregate SASAs per residue type as reported in Auton and Bolen
+    (doi:10.1073/pnas.0507053102, Supporting Table 2)."""
+    pqr_path = PROTEIN_PATH / f"{protein}.pqr"
+    with open(pqr_path, "rt") as pqr_file:
+        atoms = parse_pqr_file(pqr_file)
+    test_counts = count_residues(atoms).sort_index()
+    ref_path = PROTEIN_PATH / "Auton-Bolen.yaml"
+    with open(ref_path, "rt") as ref_file:
+        ref_dict = yaml.load(ref_file, Loader=yaml.FullLoader)
+    ref_dict = ref_dict[protein]
+    ref_df = pd.DataFrame(ref_dict).T
+    ref_df = ref_df[ref_df["number"] > 0]
+    ref_counts = np.array(ref_df["number"].sort_index())
+    results_df = pd.DataFrame({"Test": test_counts, "Ref": ref_counts})
+    _LOGGER.info(f"Results for {protein}:\n{results_df}")
+    np.testing.assert_equal(test_counts, ref_counts)
