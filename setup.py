@@ -18,6 +18,7 @@ setuptools.setup(
     license="CC0-1.0",
     author="Nathan Baker",
     author_email="nathanandrewbaker@gmail.com",
+    url="https://github.com/Electrostatics/osmolytes",
     packages=setuptools.find_packages(),
     package_data={
         "": ["data/*.yaml", "tests/data/*.json", "tests/data/*.yaml"]
