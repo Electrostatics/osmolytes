@@ -56,6 +56,12 @@ If you are using conda, you may first need to install pip with
 conda install pip
 ```
 
+Installing from source also allows testing of the software with 
+```
+python -m pytest .
+```
+These tests check the integrity of the software and provide information about the accuracy of the various calculations (particularly, surface area).
+
 ## Usage
 
 The main command-line tool installed by this package is the program `mvalue`.
