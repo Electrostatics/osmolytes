@@ -88,4 +88,4 @@ def transfer_energy(atoms, sas):
             )
         residue_energies[res] = sc_energy
     residue_energies["backbone"] = bb_energy
-    return pd.DataFrame(residue_energies).T / 1000
+    return pd.DataFrame(residue_energies).T.sort_index() / 1000
