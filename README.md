@@ -93,3 +93,8 @@ The `mvalue` program produces output that describes
 * The *m*-value associated with each osmolyte at 1M concentration.
 
 The concept of a *m*-value is described in [Wikipedia](https://en.wikipedia.org/wiki/Equilibrium_unfolding) and many review articles on protein folding and stability.
+
+# Support
+
+Re-implementation of these algorithms was supported by National Institutes of Health grant GM069702.
+
