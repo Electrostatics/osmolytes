@@ -7,7 +7,5 @@ using the methods in the following paper:
   folding/unfolding. *Proc Natl Acad Sci* 102:15065 (2005)
   https://doi.org/10.1073/pnas.0507053102
 """
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+from importlib import metadata
+__version__ = metadata.version("osmolytes")
