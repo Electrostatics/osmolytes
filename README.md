@@ -29,7 +29,7 @@ or
 
 ### Install from PyPI repository
 
-Most users will want to install the software from the PyPI repository via the following steps:
+Most users will want to install the software from the [PyPI repository](https://pypi.org/project/osmolytes/0.0.1/) via the following steps:
 
 1. Activate your virtual environment as described above
 2. Install the package using
