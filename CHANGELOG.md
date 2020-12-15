@@ -1,5 +1,11 @@
 # osmolytes
 
+## 0.1.1
+
+### Fixes
+
+* Add missing versioneer files.
+
 ## 0.1.0
 
 ### Additions

@@ -34,7 +34,7 @@ setuptools.setup(
     package_data={
         "": ["data/*.yaml", "tests/data/*.json", "tests/data/*.yaml"]
     },
-    install_requires=["numpy", "scipy", "pyyaml", "pandas"],
+    install_requires=["numpy", "scipy", "pyyaml", "pandas", "versioneer"],
     tests_require=["pytest"],
     entry_points={"console_scripts": ["mvalue=osmolytes.main:main",]},
     keywords="science chemistry biophysics biochemistry",
