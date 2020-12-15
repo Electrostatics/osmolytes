@@ -6,9 +6,13 @@ with open("README.md", "r") as readme:
     LONG_DESCRIPTION = readme.read()
 
 
+import versioneer
+
+
 setuptools.setup(
     name="osmolytes",
-    version="0.0.1",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description=(
         "This code attempts to predict the influence of osmolytes on protein "
         "stability"

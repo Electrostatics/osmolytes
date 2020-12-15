@@ -2,6 +2,7 @@
 import argparse
 import logging
 from sys import version_info
+import osmolytes
 from osmolytes.pqr import parse_pqr_file, count_residues
 from osmolytes.sasa import SolventAccessibleSurface
 from osmolytes.energy import transfer_energy
@@ -19,8 +20,9 @@ def build_parser():
     """
     parser = argparse.ArgumentParser(
         description=(
-            "This code uses various models to attempt to predict the "
-            "influence of osmolytes on protein stability"
+            f"Osmolytes v. {osmolytes.__version__}. "
+            f"This code uses various models to attempt to predict the "
+            f"influence of osmolytes on protein stability"
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -78,6 +80,7 @@ def main():
     parser = build_parser()
     args = parser.parse_args()
     logging.basicConfig(level=getattr(logging, args.log_level))
+    _LOGGER.info(f"Osmolytes version {osmolytes.__version__}")
     _LOGGER.debug(f"Got command-line arguments: {args}")
     _LOGGER.info(f"Reading PQR input from {args.pqr_path}...")
     with open(args.pqr_path, "rt") as pqr_file:
