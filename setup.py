@@ -6,9 +6,13 @@ with open("README.md", "r") as readme:
     LONG_DESCRIPTION = readme.read()
 
 
+import versioneer
+
+
 setuptools.setup(
     name="osmolytes",
-    version="0.0.1",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description=(
         "This code attempts to predict the influence of osmolytes on protein "
         "stability"
@@ -30,7 +34,7 @@ setuptools.setup(
     package_data={
         "": ["data/*.yaml", "tests/data/*.json", "tests/data/*.yaml"]
     },
-    install_requires=["numpy", "scipy", "pyyaml", "pandas"],
+    install_requires=["numpy", "scipy", "pyyaml", "pandas", "versioneer"],
     tests_require=["pytest"],
     entry_points={"console_scripts": ["mvalue=osmolytes.main:main",]},
     keywords="science chemistry biophysics biochemistry",
