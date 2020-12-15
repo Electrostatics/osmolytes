@@ -120,33 +120,34 @@ class Atom:
         :param str pqr_string:  line from PQR file for initializing structure
         """
         line = pqr_string.strip()
-        words = line.split()
-        if len(words) > 11:
+        entry_type = line[:6].strip()
+        words = line[6:].split()
+        if len(words) > 10:
             errstr = "Too many entries ({num}) in PQR file line: {line}"
             raise ValueError(errstr.format(num=len(words), line=line))
-        elif len(words) < 10:
+        elif len(words) < 9:
             errstr = "Too few entries ({num}) in PQR file line: {line}"
             raise ValueError(errstr.format(num=len(words), line=line))
-        elif len(words) == 11:
+        elif len(words) == 10:
             has_chain = True
         else:
             has_chain = False
-        self.entry_type = words[0]
-        self.pqr_atom_num = int(words[1])
-        self.atom_name = words[2]
-        self.res_name = words[3]
+        self.entry_type = entry_type
+        self.pqr_atom_num = int(words[0])
+        self.atom_name = words[1]
+        self.res_name = words[2]
         if has_chain:
-            self.chain_id = words[4]
+            self.chain_id = words[3]
             chain_offset = 1
         else:
             chain_offset = 0
-        self.res_num = int(words[4 + chain_offset])
-        x = float(words[5 + chain_offset])
-        y = float(words[6 + chain_offset])
-        z = float(words[7 + chain_offset])
+        self.res_num = words[3 + chain_offset].strip()
+        x = float(words[4 + chain_offset])
+        y = float(words[5 + chain_offset])
+        z = float(words[6 + chain_offset])
         self.position = np.array([x, y, z])
-        self.charge = float(words[8 + chain_offset])
-        self.radius = float(words[9 + chain_offset])
+        self.charge = float(words[7 + chain_offset])
+        self.radius = float(words[8 + chain_offset])
 
     def __str__(self):
         outstr = ""
@@ -283,8 +284,8 @@ def parse_pqr_file(pqr_file):
     for line in pqr_file:
         line = line.strip()
         if line:
-            words = line.split()
-            if words[0] in [
+            record_type = line[:6].strip()
+            if record_type in [
                 "HEADER",
                 "REMARK",
                 "TER",
@@ -293,7 +294,7 @@ def parse_pqr_file(pqr_file):
                 "END",
             ]:
                 pass
-            elif words[0] in ["ATOM", "HETATM"]:
+            elif record_type in ["ATOM", "HETATM"]:
                 atoms.append(Atom(line))
             else:
                 errstr = f"Unable to parse PQR line: {line}"
