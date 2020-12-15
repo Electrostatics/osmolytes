@@ -1,10 +1,15 @@
 # osmolytes
 
-## 0.1.1
+## 1.0.0
+
+### Changes
+
+* Restricted Python version to 3.8+.
 
 ### Fixes
 
-* Add missing versioneer files.
+* Removed [versioneer](https://github.com/python-versioneer/python-versioneer) support for versioning due to lack of compatibility with PEP517.
+Replaced with `importlib` suggestion from [PyPA](https://packaging.python.org/guides/single-sourcing-package-version/).
 
 ## 0.1.0
 
