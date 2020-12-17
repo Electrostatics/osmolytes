@@ -8,7 +8,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="osmolytes",
-    version="1.1.0",
+    version="1.1.1",
     description=(
         "This code attempts to predict the influence of osmolytes on protein "
         "stability"
@@ -32,7 +32,7 @@ setuptools.setup(
     },
     install_requires=["numpy", "scipy", "pyyaml", "pandas", "openpyxl"],
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["mvalue=osmolytes.main:main"]},
+    entry_points={"console_scripts": ["mvalue=osmolytes.main:console"]},
     keywords="science chemistry biophysics biochemistry",
     classifiers=[
         "Development Status :: 4 - Beta",
