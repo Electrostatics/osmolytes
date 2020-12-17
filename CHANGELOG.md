@@ -1,5 +1,11 @@
 # osmolytes
 
+## 1.1.1 (17-Dec-2020)
+
+### Fixes
+
+* Remove excess output on stdout/stderr
+
 ## 1.1.0 (16-Dec-2020)
 
 ### Additions

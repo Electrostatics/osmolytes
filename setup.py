@@ -32,7 +32,7 @@ setuptools.setup(
     },
     install_requires=["numpy", "scipy", "pyyaml", "pandas", "openpyxl"],
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["mvalue=osmolytes.main:main"]},
+    entry_points={"console_scripts": ["mvalue=osmolytes.main:console"]},
     keywords="science chemistry biophysics biochemistry",
     classifiers=[
         "Development Status :: 4 - Beta",

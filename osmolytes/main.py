@@ -69,9 +69,7 @@ def build_parser():
         help="output m-value results in Excel (xlsx) or CSV (csv) format",
     )
     parser.add_argument(
-        "--output-dir",
-        default=".",
-        help="directory for m-value output"
+        "--output-dir", default=".", help="directory for m-value output"
     )
     parser.add_argument(
         "pqr_path",
@@ -132,3 +130,8 @@ def main(args=None):
         "energy_df": energy_df,
         "energies": energies,
     }
+
+
+def console():
+    """Run code from the console."""
+    main()
