@@ -1,6 +1,6 @@
 # osmolytes
 
-## 1.1.0 (forthcoming)
+## 1.1.0 (16-Dec-2020)
 
 ### Additions
 
