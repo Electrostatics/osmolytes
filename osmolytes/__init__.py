@@ -8,4 +8,5 @@ using the methods in the following paper:
   https://doi.org/10.1073/pnas.0507053102
 """
 from importlib import metadata
+
 __version__ = metadata.version("osmolytes")

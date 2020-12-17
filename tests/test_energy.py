@@ -4,9 +4,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from scipy.stats import linregress
-from osmolytes.pqr import parse_pqr_file
-from osmolytes.sasa import SolventAccessibleSurface
-from osmolytes.energy import transfer_energy
+from osmolytes.main import main
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,15 +30,21 @@ def test_energy(tmp_path):
     test_results = {}
     for protein in ["1A6F", "1STN", "2BU4"]:
         pqr_path = PROTEIN_PATH / f"{protein}.pqr"
-        with open(pqr_path, "rt") as pqr_file:
-            atoms = parse_pqr_file(pqr_file)
         xyz_path = Path(tmp_path) / f"{protein}.xyz"
-        sas = SolventAccessibleSurface(
-            atoms, probe_radius=1.4, num_points=2000, xyz_path=xyz_path
+        results = main(
+            [
+                "--solvent-radius",
+                "1.4",
+                "--surface-points",
+                "2000",
+                "--surface-output",
+                str(xyz_path),
+                str(pqr_path),
+            ]
         )
-        energy_df = transfer_energy(atoms, sas)
+        energy_df = results["energy_df"]
         _LOGGER.info(f"{protein} detailed energies:\n{energy_df.to_string()}")
-        energies = energy_df.sum(axis=0).sort_values()
+        energies = results["energies"]
         _LOGGER.info(f"{protein} m-values\n{energies}")
         for osmolyte, value in energies.iteritems():
             key = f"{protein} {osmolyte}"

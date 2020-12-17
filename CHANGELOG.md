@@ -1,6 +1,16 @@
 # osmolytes
 
-## 1.0.0
+## 1.1.0 (forthcoming)
+
+### Additions
+
+* CSV and Excel output
+
+### Changes
+
+* Refactored tests to also test main driver (where relevant)
+
+## 1.0.0 (15-Dec-2020)
 
 ### Changes
 
@@ -21,6 +31,6 @@ Replaced with `importlib` suggestion from [PyPA](https://packaging.python.org/gu
 
 Fixed problem with insertion codes and added tests for problems in the future.
 
-## 0.0.1
+## 0.0.1 (26-Nov-2020)
 
 Initial release.

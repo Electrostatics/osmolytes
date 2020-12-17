@@ -1,6 +1,7 @@
 """Main driver for module."""
 import argparse
 import logging
+from pathlib import Path
 from sys import version_info
 import osmolytes
 from osmolytes.pqr import parse_pqr_file, count_residues
@@ -47,23 +48,30 @@ def build_parser():
     )
     parser.add_argument(
         "--surface-output",
-        nargs=1,
         default=None,
         help="path for output of surface in XYZ format",
     )
     parser.add_argument(
         "--solvent-radius",
-        nargs=1,
         default=1.4,
         type=float,
         help="radius of solvent molecule (in Å)",
     )
     parser.add_argument(
         "--surface-points",
-        nargs=1,
         default=2000,
         type=int,
         help="number of points per atom for constructing surface",
+    )
+    parser.add_argument(
+        "--output",
+        choices=["xlsx", "csv"],
+        help="output m-value results in Excel (xlsx) or CSV (csv) format",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="directory for m-value output"
     )
     parser.add_argument(
         "pqr_path",
@@ -75,10 +83,15 @@ def build_parser():
     return parser
 
 
-def main():
-    """Main driver."""
+def main(args=None):
+    """Main entry point.
+
+    :param list(str) args:  list of strings to parse
+    :returns:  dictionary of results
+    :rtype:  dict
+    """
     parser = build_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     logging.basicConfig(level=getattr(logging, args.log_level))
     _LOGGER.info(f"Osmolytes version {osmolytes.__version__}")
     _LOGGER.debug(f"Got command-line arguments: {args}")
@@ -103,3 +116,19 @@ def main():
     _LOGGER.info(f"Detailed energies (kcal/mol/M):\n{energy_df.to_string()}")
     energies = energy_df.sum(axis=0).sort_values()
     _LOGGER.info(f"Summary energies (kcal/mol/M):\n{energies}")
+    output_dir = Path(args.output_dir)
+    if args.output == "xlsx":
+        output_path = output_dir / f"{Path(args.pqr_path).stem}-mvalues.xlsx"
+        _LOGGER.info(f"Writing energies (kcal/mol/M) to {output_path}")
+        energy_df.to_excel(output_path)
+    elif args.output == "csv":
+        output_path = output_dir / f"{Path(args.pqr_path).stem}-mvalues.csv"
+        _LOGGER.info(f"Writing energies (kcal/mol/M) to {output_path}")
+        energy_df.to_csv(output_path)
+    return {
+        "args": args,
+        "atoms": atoms,
+        "sas": sas,
+        "energy_df": energy_df,
+        "energies": energies,
+    }
