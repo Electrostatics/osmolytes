@@ -1,5 +1,11 @@
 # osmolytes
 
+## 1.2.0 (17-Dec-2020)
+
+## Additions
+
+* Output surface area per residue type
+
 ## 1.1.1 (17-Dec-2020)
 
 ### Fixes

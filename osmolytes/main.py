@@ -6,7 +6,7 @@ from sys import version_info
 import osmolytes
 from osmolytes.pqr import parse_pqr_file, count_residues
 from osmolytes.sasa import SolventAccessibleSurface
-from osmolytes.energy import transfer_energy
+from osmolytes.energy import transfer_energy, get_folded_areas
 
 
 assert version_info > (3, 5)
@@ -96,8 +96,6 @@ def main(args=None):
     _LOGGER.info(f"Reading PQR input from {args.pqr_path}...")
     with open(args.pqr_path, "rt") as pqr_file:
         atoms = parse_pqr_file(pqr_file)
-    count_df = count_residues(atoms)
-    _LOGGER.info(f"Protein composition:\n{count_df}")
     _LOGGER.info(
         f"Constructing protein solvent-accessible surface with "
         f"solvent radius {args.solvent_radius} and {args.surface_points} "
@@ -109,6 +107,15 @@ def main(args=None):
         num_points=args.surface_points,
         xyz_path=args.surface_output,
     )
+    counts = count_residues(atoms)
+    areas = get_folded_areas(atoms, sas).rename(
+        {"sidechain": "sidechain areas", "backbone": "backbone areas"},
+        axis="columns"
+    )
+    areas["residue counts"] = counts
+    print(areas)
+    areas = areas[["residue counts", "sidechain areas", "backbone areas"]]
+    _LOGGER.info(f"Protein composition:\n{areas}")
     _LOGGER.info("Calculating transfer energies.")
     energy_df = transfer_energy(atoms, sas)
     _LOGGER.info(f"Detailed energies (kcal/mol/M):\n{energy_df.to_string()}")

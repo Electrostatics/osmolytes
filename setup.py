@@ -8,7 +8,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="osmolytes",
-    version="1.1.1",
+    version="1.2.0",
     description=(
         "This code attempts to predict the influence of osmolytes on protein "
         "stability"
