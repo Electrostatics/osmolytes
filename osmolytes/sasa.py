@@ -24,87 +24,35 @@ TRIPEPTIDE_DICT = yaml.load(
     pkg_resources.resource_stream(__name__, "data/tripeptide-areas.yaml"),
     Loader=yaml.FullLoader,
 )
+# The plastic constant (generalization of golden ratio)
+PLASTIC = np.cbrt((9 + np.sqrt(69))/18) + np.cbrt((9 - np.sqrt(69))/18)
 
 
-def sphere_cube(num):
-    """Discretize a sphere using points uniformly distributed on a cube.
+def sphere(num):
+    """Discretize unit sphere at the origin using a low-discrepancy recurrence.
 
-    Discretize a unit sphere at the origin with a cube geodesic.
+    Implementation from
+    http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+    using Kronecker recurrence sequence.
 
-    :param num:  target number of points on sphere
-    :type num:  int
-    :returns:  an array of (anum)-by-3 dimension where anum may not be
-        exactly the same as num
+    :param int num:  target number of points on sphere
+    :returns:  an array of (num)-by-3 dimension coordinates
     :rtype:  np.ndarray
     """
-    if num < 8:
-        num = 8
-    num = int((np.sqrt(6 * num - 32) - 4.0) / 6.0)
-    line = np.linspace(0, 1, num + 2)
-    edge = np.delete(line, [0, num + 1])
-    points = None
-    # Generate faces
-    for x in [0.0, 1.0]:
-        face = np.array([(x, y_, z_) for y_ in edge for z_ in edge])
-        if points is None:
-            points = face
-        else:
-            points = np.concatenate([points, face])
-    for y in [0.0, 1.0]:
-        face = np.array([(x_, y, z_) for x_ in edge for z_ in edge])
-        points = np.concatenate([points, face])
-    for z in [0.0, 1.0]:
-        face = np.array([(x_, y_, z) for x_ in edge for y_ in edge])
-        points = np.concatenate([points, face])
-    # Generate corners
-    for x in [0.0, 1.0]:
-        for y in [0.0, 1.0]:
-            for z in [0, 1.0]:
-                corner = np.array([x, y, z])
-                points = np.vstack((points, corner))
-    # Generate edges
-    for x in [0.0, 1.0]:
-        for y in [0.0, 1.0]:
-            edge_ = np.array([(x, y, z_) for z_ in edge])
-            points = np.concatenate([points, edge_])
-            for z in [0, 1.0]:
-                edge_ = np.array([(x, y_, z) for y_ in edge])
-                points = np.concatenate([points, edge_])
-                edge_ = np.array([(x_, y, z) for x_ in edge])
-                points = np.concatenate([points, edge_])
-    # Move center to origin
-    trans = np.array([0.5, 0.5, 0.5])
-    points = points - trans
-    # Scale to sphere
-    dist = np.linalg.norm(points, axis=1)
-    points = np.divide(points, dist[:, None])
-    return points
+    n = np.arange(1, num+1, 1)
 
+    a1 = 1.0 / PLASTIC
+    a2 = a1 / PLASTIC
 
-def sphere_cylinder(num):
-    """Discretize a sphere using cylinder transform.
+    u = (0.5 + a1 * n) % 1
+    v = (0.5 + a2 * n) % 1
 
-    Discretize a unit sphere at the origin.
+    theta = np.arccos(2 * u - 1) + 0.5 * np.pi
+    phi = 2 * np.pi * v
 
-    .. todo:: Fix duplicate points at poles
-
-    :param num:  target number of points on sphere
-    :type num:  int
-    :returns:  an array of (anum)-by-3 dimension where anum may not be
-        exactly the same as num
-    :rtype:  np.ndarray
-    """
-    num = int(np.sqrt(num))
-    theta = np.linspace(0, 2 * np.pi, num, endpoint=False)
-    u = np.linspace(-1, 1, num)
-    theta_z = np.array([(t, z) for t in theta for z in u])
-    cos_theta = np.cos(theta_z[:, 0])
-    sin_theta = np.sin(theta_z[:, 0])
-    z2 = np.square(theta_z[:, 1])
-    r = np.sqrt(1 - z2)
-    x = r * cos_theta
-    y = r * sin_theta
-    z = theta_z[:, 1]
+    x = np.cos(theta) * np.cos(phi)
+    y = np.cos(theta) * np.sin(phi)
+    z = np.sin(theta)
     return np.array([x, y, z]).T
 
 
@@ -125,7 +73,7 @@ class SolventAccessibleSurface:
         self.atoms = atoms
         self.probe_radius = probe_radius
         self.num_points = num_points
-        self.sphere = sphere_cylinder(num_points)
+        self.sphere = sphere(num_points)
         self.max_radius = max([atom.radius for atom in self.atoms])
         self.max_search = 2 * self.max_radius + 2 * probe_radius
         _LOGGER.debug("max_search = %g", self.max_search)
