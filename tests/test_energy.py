@@ -36,7 +36,7 @@ def test_energy(tmp_path):
                 "--solvent-radius",
                 "1.4",
                 "--surface-points",
-                "2000",
+                "200",
                 "--surface-output",
                 str(xyz_path),
                 str(pqr_path),
