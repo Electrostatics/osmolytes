@@ -8,7 +8,7 @@ From Eqs. 1 and 2 in Supporting Text from:
   PMCID: PMC1257718.
 """
 import logging
-import pkg_resources
+from importlib import resources
 import yaml
 import pandas as pd
 from osmolytes.pqr import aggregate, count_residues
@@ -17,7 +17,7 @@ from osmolytes.sasa import ReferenceModels
 
 _LOGGER = logging.getLogger(__name__)
 ENERGY_DICT = yaml.load(
-    pkg_resources.resource_stream(__name__, "data/transfer-energies.yaml"),
+    resources.files(__package__).joinpath("data/transfer-energies.yaml").read_text(encoding="utf-8"),
     Loader=yaml.FullLoader,
 )
 
@@ -75,7 +75,7 @@ def transfer_energy(atoms, sas):
     osmolytes = list(ENERGY_DICT["backbone"].keys())
     residue_energies = {}
     bb_energy = {osmolyte: 0.0 for osmolyte in osmolytes}
-    for res, area in scaled_areas.T.iteritems():
+    for res, area in scaled_areas.T.items():
         sc_energy = {}
         for osmolyte in osmolytes:
             sc_energy[osmolyte] = (

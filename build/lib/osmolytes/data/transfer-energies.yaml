@@ -1,0 +1,177 @@
+# Data from:  Auton M, Bolen DW. Predicting the energetics of osmolyte-induced
+# protein folding/unfolding. Proc Natl Acad Sci U S A. 2005 Oct 18;102(42):
+# 15065-8. doi: 10.1073/pnas.0507053102. Epub 2005 Oct 7. PMID: 16214887;
+# PMCID: PMC1257718.
+#
+# Values from Supporting Table 1:  unit transfer free energies (cal/mol) from
+# water to 1 M osmolyte
+backbone:
+  TMAO: 90
+  sarcosine: 52
+  betaine: 67
+  proline: 48
+  sorbitol: 35
+  sucrose: 62
+  urea: -39
+ALA:
+  TMAO: -14.64
+  sarcosine: 10.91
+  betaine: 4.77
+  proline: -0.07
+  sorbitol: 16.57
+  sucrose: 22.05
+  urea: -4.69
+ARG:
+  TMAO: -109.27
+  sarcosine: -32.24
+  betaine: -109.45
+  proline: -60.18
+  sorbitol: -24.65
+  sucrose: -79.32
+  urea: -21.17
+ASN:
+  TMAO: 55.69
+  sarcosine: -40.93
+  betaine: 33.17
+  proline: -17.71
+  sorbitol: -21.21
+  sucrose: -28.28
+  urea: -38.79
+ASP:
+  TMAO: -66.67
+  sarcosine: -14.20
+  betaine: -116.56
+  proline: -90.51
+  sorbitol: -83.88
+  sucrose: -37.17
+  urea: 3.55
+# Cysteine is not measureable because of oxidation and precipitation in solution
+CYS:
+  TMAO: 0
+  sarcosine: 0
+  betaine: 0
+  proline: 0
+  sorbitol: 0
+  sucrose: 0
+  urea: 0
+GLN:
+  TMAO: 41.41
+  sarcosine: -10.19
+  betaine: 7.57
+  proline: -32.26
+  sorbitol: -23.98
+  sucrose: -40.87
+  urea: -54.81
+GLU:
+  TMAO: -83.25
+  sarcosine: -12.61
+  betaine: -112.08
+  proline: -89.17
+  sorbitol: -70.05
+  sucrose: -41.65
+  urea: 0.62
+# Glycine is a reference state
+GLY:
+  TMAO: 0
+  sarcosine: 0
+  betaine: 0
+  proline: 0
+  sorbitol: 0
+  sucrose: 0
+  urea: 0
+HIS:
+  TMAO: 42.07
+  sarcosine: -20.80
+  betaine: -35.97
+  proline: -45.10
+  sorbitol: -42.45
+  sucrose: -118.66
+  urea: -50.51
+ILE:
+  TMAO: -25.43
+  sarcosine: 39.98
+  betaine: -1.27
+  proline: -2.72
+  sorbitol: 36.90
+  sucrose: 28.12
+  urea: -38.43
+LEU:
+  TMAO: 11.62
+  sarcosine: 38.33
+  betaine: -17.73
+  proline: 4.77
+  sorbitol: 39.07
+  sucrose: 37.11
+  urea: -54.57
+LYS:
+  TMAO: -110.23
+  sarcosine: -27.42
+  betaine: -171.99
+  proline: -59.87
+  sorbitol: -32.47
+  sucrose: -39.60
+  urea: -22.76
+MET:
+  TMAO: -7.65
+  sarcosine: 8.18
+  betaine: -14.16
+  proline: -35.12
+  sorbitol: 20.97
+  sucrose: -6.66
+  urea: -48.34
+PHE:
+  TMAO: -9.32
+  sarcosine: -12.64
+  betaine: -112.93
+  proline: -71.26
+  sorbitol: 26.38
+  sucrose: -96.35
+  urea: -83.11
+PRO:
+  TMAO: -137.73
+  sarcosine: -34.23
+  betaine: -125.16
+  proline: -63.96
+  sorbitol: -4.48
+  sucrose: -73.02
+  urea: -17.65
+VAL:
+  TMAO: -1.02
+  sarcosine: 29.32
+  betaine: -19.63
+  proline: 7.96
+  sorbitol: 24.65
+  sucrose: 33.92
+  urea: -21.65
+SER:
+  TMAO: -39.04
+  sarcosine: -27.98
+  betaine: -41.85
+  proline: -33.49
+  sorbitol: -1.58
+  sucrose: -2.79
+  urea: -20.56
+THR:
+  TMAO: 3.57
+  sarcosine: -7.54
+  betaine: 0.33
+  proline: -18.33
+  sorbitol: 13.20
+  sucrose: 20.82
+  urea: -22.09
+TRP:
+  TMAO: -152.87
+  sarcosine: -113.03
+  betaine: -369.93
+  proline: -198.37
+  sorbitol: -67.23
+  sucrose: -215.27
+  urea: -141.46
+TYR:
+  TMAO: -114.32
+  sarcosine: -26.37
+  betaine: -213.09
+  proline: -138.41
+  sorbitol: -53.50
+  sucrose: -78.41
+  urea: -45.08

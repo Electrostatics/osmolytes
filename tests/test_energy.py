@@ -46,7 +46,7 @@ def test_energy(tmp_path):
         _LOGGER.info(f"{protein} detailed energies:\n{energy_df.to_string()}")
         energies = results["energies"]
         _LOGGER.info(f"{protein} m-values\n{energies}")
-        for osmolyte, value in energies.iteritems():
+        for osmolyte, value in energies.items():
             key = f"{protein} {osmolyte}"
             if key in AUTON_RESULTS:
                 test_results[key] = value

@@ -1,0 +1,66 @@
+# Data from:  Auton M, Bolen DW. Predicting the energetics of osmolyte-induced
+# protein folding/unfolding. Proc Natl Acad Sci U S A. 2005 Oct 18;102(42):
+# 15065-8. doi: 10.1073/pnas.0507053102. Epub 2005 Oct 7. PMID: 16214887;
+# PMCID: PMC1257718.
+#
+# Values from Supporting Table 2:  tripeptide Gly-X-Gly areas (A^2/residue)
+ALA:
+  backbone:  46.2
+  sidechain: 71.9
+PHE:
+  backbone:  38.4
+  sidechain: 184.4
+LEU:
+  backbone:  35.3
+  sidechain: 157.8
+ILE:
+  backbone:  30.9
+  sidechain: 150.1
+VAL:
+  backbone:  36.1
+  sidechain: 128.4
+PRO:
+  backbone:  35.6
+  sidechain: 111.0
+MET:
+  backbone:  38.6
+  sidechain: 164.8
+TRP:
+  backbone:  37.4
+  sidechain: 228.9
+GLY:
+  backbone:  88.1
+  sidechain: 0
+SER:
+  backbone:  44.0
+  sidechain: 85.8
+THR:
+  backbone:  37.9
+  sidechain: 114.6
+TYR:
+  backbone:  38.7
+  sidechain: 198.1
+GLN:
+  backbone:  37.8
+  sidechain: 155.4
+ASN:
+  backbone:  40.2
+  sidechain: 125.3
+ASP:
+  backbone:  40.5
+  sidechain: 118.2
+GLU:
+  backbone:  37.8
+  sidechain: 148.4
+HIS:
+  backbone:  40.4
+  sidechain: 162.1
+LYS:
+  backbone:  38.7
+  sidechain: 187.1
+ARG:
+  backbone:  39.1
+  sidechain: 216.9
+CYS:
+  backbone:  42.6
+  sidechain: 103.5

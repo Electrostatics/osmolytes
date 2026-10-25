@@ -1,0 +1,66 @@
+# Data from:  Auton M, Bolen DW. Predicting the energetics of osmolyte-induced
+# protein folding/unfolding. Proc Natl Acad Sci U S A. 2005 Oct 18;102(42):
+# 15065-8. doi: 10.1073/pnas.0507053102. Epub 2005 Oct 7. PMID: 16214887;
+# PMCID: PMC1257718.
+#
+# Values from Supporting Table 2:  denatured state areas (A^2/residue)
+ALA:
+  backbone: 27.9
+  sidechain: 55.1
+PHE:
+  backbone: 24.3
+  sidechain: 128.8
+LEU:
+  backbone: 22.7
+  sidechain: 109.6
+ILE:
+  backbone: 20.0
+  sidechain: 117.1
+VAL:
+  backbone: 20.4
+  sidechain: 96.4
+PRO:
+  backbone: 22.5
+  sidechain: 87.0
+MET:
+  backbone: 25.3
+  sidechain: 122.4
+TRP:
+  backbone: 23.6
+  sidechain: 156.6
+GLY:
+  backbone: 65.2
+  sidechain: 0
+SER:
+  backbone: 29.4
+  sidechain: 66.5
+THR:
+  backbone: 24.1
+  sidechain: 84.3
+TYR:
+  backbone: 25.6
+  sidechain: 141.7
+GLN:
+  backbone: 25.3
+  sidechain: 116.9
+ASN:
+  backbone: 25.2
+  sidechain: 90.1
+ASP:
+  backbone: 26.0
+  sidechain: 87.0
+GLU:
+  backbone: 25.7
+  sidechain: 113.4
+HIS:
+  backbone: 24.2
+  sidechain: 111.5
+LYS:
+  backbone: 26.1
+  sidechain: 150.7
+ARG:
+  backbone: 25.1
+  sidechain: 171.1
+CYS:
+  backbone: 26.4
+  sidechain: 73.0

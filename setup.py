@@ -21,7 +21,7 @@ setuptools.setup(
         "https://doi.org/10.1073/pnas.0507053102. Other models may be added "
         "in the future."
     ),
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     license="CC0-1.0",
     author="Nathan Baker",
     author_email="nathanandrewbaker@gmail.com",
@@ -43,8 +43,11 @@ setuptools.setup(
         "Operating System :: MacOS",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Scientific/Engineering :: Physics",
