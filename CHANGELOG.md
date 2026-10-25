@@ -1,5 +1,16 @@
 # osmolytes
 
+## Unreleased
+
+### Fixes
+
+* Replaced pandas `iteritems()`, removed in pandas 2, with `items()`.
+* Replaced `pkg_resources`, removed from recent setuptools, with `importlib.resources`.
+
+### Changes
+
+* Restricted Python version to 3.10+ and test on Python 3.10-3.14.
+
 ## 1.2.0 (17-Dec-2020)
 
 ## Additions

@@ -1,0 +1,66 @@
+# Data from: Creamer TP, Srinivasan R, Rose GD. Modeling unfolded states of
+# proteins and peptides. II. Backbone solvent accessibility. Biochemistry.
+# 1997 Mar 11; 36(10):2832-5. doi: 10.1021/bi962819o. PMID: 9062111.
+#
+# Intervals represent lower and upper bounds from Table 1 of paper.
+
+ALA: 
+  backbone: [19.8, 35.9]
+  sidechain: [46.6, 63.6]
+ARG:
+  backbone: [17.1, 33.0]
+  sidechain: [156.9, 185.3]
+ASN:
+  backbone: [17.6, 32.7]
+  sidechain: [84.5, 95.6]
+ASP:
+  backbone: [18.1, 33.9]
+  sidechain: [79.2, 94.8]
+CYS:
+  backbone: [18.2, 34.5]
+  sidechain: [62.9, 83.0]
+GLN:
+  backbone: [17.2, 33.4]
+  sidechain: [105.0, 128.7]
+GLU:
+  backbone: [17.9, 33.5]
+  sidechain: [102.8, 123.9]
+GLY:
+  backbone: [54.6, 75.7]
+  sidechain: [0.0, 0.0]
+HIS:
+  backbone: [14.9, 33.4]
+  sidechain: [103.9, 119.1]
+ILE:
+  backbone: [15.2, 24.7]
+  sidechain: [100.1, 134.1]
+LEU:
+  backbone: [14.7, 30.7]
+  sidechain: [101.4, 117.7]
+LYS:
+  backbone: [18.3, 33.8]
+  sidechain: [142.5, 158.8]
+MET:
+  backbone: [16.7, 33.8]
+  sidechain: [105.3, 139.5]
+PHE:
+  backbone: [15.3, 33.3]
+  sidechain: [118.7, 139.8]
+PRO:
+  backbone: [18.9, 26.1]
+  sidechain: [83.5, 90.5]
+SER:
+  backbone: [23.8, 35.0]
+  sidechain: [59.7, 73.3]
+THR:
+  backbone: [18.6, 29.5]
+  sidechain: [77.3, 91.2]
+TRP:
+  backbone: [15.1, 32.0]
+  sidechain: [154.7, 158.4]
+TYR:
+  backbone: [17.7, 33.5]
+  sidechain: [131.0, 152.3]
+VAL:
+  backbone: [15.9, 24.9]
+  sidechain: [81.8, 110.9]

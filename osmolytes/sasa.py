@@ -1,6 +1,6 @@
 """Calculate solvent-accessible surface areas using Lee-Richards method."""
 import logging
-import pkg_resources
+from importlib import resources
 import yaml
 import numpy as np
 import pandas as pd
@@ -13,15 +13,15 @@ _LOGGER = logging.getLogger(__name__)
 RADIUS_CUTOFF = 0.0001
 # Data files for reference states
 CREAMER_DICT = yaml.load(
-    pkg_resources.resource_stream(__name__, "data/creamer-areas.yaml"),
+    resources.files(__package__).joinpath("data/creamer-areas.yaml").read_text(encoding="utf-8"),
     Loader=yaml.FullLoader,
 )
 AUTON_DICT = yaml.load(
-    pkg_resources.resource_stream(__name__, "data/denatured-areas.yaml"),
+    resources.files(__package__).joinpath("data/denatured-areas.yaml").read_text(encoding="utf-8"),
     Loader=yaml.FullLoader,
 )
 TRIPEPTIDE_DICT = yaml.load(
-    pkg_resources.resource_stream(__name__, "data/tripeptide-areas.yaml"),
+    resources.files(__package__).joinpath("data/tripeptide-areas.yaml").read_text(encoding="utf-8"),
     Loader=yaml.FullLoader,
 )
 # The plastic constant (generalization of golden ratio)
@@ -278,7 +278,7 @@ class ReferenceModels:
         """
         count = count_residues(atoms)
         rows = {}
-        for res, num in count.iteritems():
+        for res, num in count.items():
             res_areas = self.residue_area(res, model, how)
             row = {}
             for what in ["sidechain", "backbone"]:
